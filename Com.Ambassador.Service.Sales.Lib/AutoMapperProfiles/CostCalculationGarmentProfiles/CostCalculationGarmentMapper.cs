@@ -78,7 +78,12 @@ namespace Com.Ambassador.Service.Sales.Lib.AutoMapperProfiles.CostCalculationGar
               .ForPath(d => d.ApprovalPPIC.ApprovedBy, opt => opt.MapFrom(s => s.ApprovedPPICBy))
               .ForPath(d => d.ApprovalPPIC.ApprovedDate, opt => opt.MapFrom(s => s.ApprovedPPICDate))
 
-              .ReverseMap();
+		      .ForPath(d => d.BookingOrderId, opt => opt.MapFrom(s => s.BookingOrderId))
+			  .ForPath(d => d.BookingOrderNo, opt => opt.MapFrom(s => s.BookingOrderNo))
+			  .ForPath(d => d.BOQuantity, opt => opt.MapFrom(s => s.BOQuantity))
+			  .ForPath(d => d.BookingOrderItemId, opt => opt.MapFrom(s => s.BookingOrderItemId))
+
+			  .ReverseMap();
 		}
 	}
 }

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Com.Ambassador.Service.Sales.Lib.Models.GarmentBookingOrderModel;
+using Com.Danliris.Service.Sales.Lib.ViewModels.GarmentBookingOrderViewModels;
 
 namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Facades.GarmentBookingOrderFacade
 {
@@ -48,6 +49,11 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Facades.GarmentBookingO
         public ReadResponse<GarmentBookingOrder> ReadByBookingOrderNo(int page, int size, string order, List<string> select, string keyword, string filter)
         {
             return garmentBookingOrderLogic.ReadByBookingOrderNo(page, size, order, select, keyword, filter);
+        }
+
+        public ReadResponse<GarmentBookingOrderForCCGViewModel> ReadByBookingOrderNoForCCG(int page, int size, string order, List<string> select, string keyword, string filter)
+        {
+            return garmentBookingOrderLogic.ReadByBookingOrderNoForCCG(page, size, order, select, keyword, filter);
         }
 
         public async Task<GarmentBookingOrder> ReadByIdAsync(int id)

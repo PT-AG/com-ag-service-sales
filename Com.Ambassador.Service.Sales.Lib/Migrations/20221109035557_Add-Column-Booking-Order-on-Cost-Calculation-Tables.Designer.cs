@@ -4,14 +4,16 @@ using Com.Ambassador.Service.Sales.Lib;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Com.Ambassador.Service.Sales.Lib.Migrations
 {
     [DbContext(typeof(SalesDbContext))]
-    partial class SalesDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221109035557_Add-Column-Booking-Order-on-Cost-Calculation-Tables")]
+    partial class AddColumnBookingOrderonCostCalculationTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2614,9 +2616,6 @@ namespace Com.Ambassador.Service.Sales.Lib.Migrations
 
                     b.Property<double>("Amount");
 
-                    b.Property<string>("Article")
-                        .HasMaxLength(1000);
-
                     b.Property<string>("BuyerBrandCode");
 
                     b.Property<int>("BuyerBrandId");
@@ -2624,16 +2623,6 @@ namespace Com.Ambassador.Service.Sales.Lib.Migrations
                     b.Property<string>("BuyerBrandName");
 
                     b.Property<double?>("Claim");
-
-                    b.Property<string>("ComodityCode")
-                        .HasMaxLength(500);
-
-                    b.Property<int>("ComodityId");
-
-                    b.Property<string>("ComodityName")
-                        .HasMaxLength(500);
-
-                    b.Property<int>("CostCalculationId");
 
                     b.Property<string>("Country")
                         .HasMaxLength(255);
@@ -2660,11 +2649,6 @@ namespace Com.Ambassador.Service.Sales.Lib.Migrations
 
                     b.Property<string>("Delivery")
                         .HasMaxLength(255);
-
-                    b.Property<DateTimeOffset>("DeliveryDate");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(3000);
 
                     b.Property<string>("DocPresented")
                         .HasMaxLength(3000);
@@ -2707,9 +2691,6 @@ namespace Com.Ambassador.Service.Sales.Lib.Migrations
 
                     b.Property<int>("LateReturn");
 
-                    b.Property<string>("Material")
-                        .HasMaxLength(3000);
-
                     b.Property<string>("NoHS")
                         .HasMaxLength(3000);
 
@@ -2721,22 +2702,23 @@ namespace Com.Ambassador.Service.Sales.Lib.Migrations
                     b.Property<string>("PaymentMethod")
                         .HasMaxLength(500);
 
-                    b.Property<double>("Price");
+                    b.Property<string>("RecipientAddress")
+                        .HasMaxLength(3000);
 
-                    b.Property<double>("Quantity");
+                    b.Property<string>("RecipientJob")
+                        .HasMaxLength(100);
 
-                    b.Property<string>("RONumber")
+                    b.Property<string>("RecipientName")
                         .HasMaxLength(255);
+
+                    b.Property<string>("SCType")
+                        .HasMaxLength(20);
 
                     b.Property<string>("SalesContractNo")
                         .HasMaxLength(255);
 
                     b.Property<string>("UId")
                         .HasMaxLength(255);
-
-                    b.Property<string>("UomId");
-
-                    b.Property<string>("UomUnit");
 
                     b.HasKey("Id");
 
@@ -2778,8 +2760,6 @@ namespace Com.Ambassador.Service.Sales.Lib.Migrations
                     b.Property<string>("Description")
                         .HasMaxLength(3000);
 
-                    b.Property<long>("GSCId");
-
                     b.Property<bool>("IsDeleted");
 
                     b.Property<string>("LastModifiedAgent")
@@ -2796,14 +2776,102 @@ namespace Com.Ambassador.Service.Sales.Lib.Migrations
 
                     b.Property<double>("Quantity");
 
+                    b.Property<long>("SalesContractROId");
+
                     b.Property<string>("UId")
                         .HasMaxLength(255);
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GSCId");
+                    b.HasIndex("SalesContractROId");
 
                     b.ToTable("GarmentSalesContractItems");
+                });
+
+            modelBuilder.Entity("Com.Ambassador.Service.Sales.Lib.Models.GarmentSalesContractModel.GarmentSalesContractRO", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("Active");
+
+                    b.Property<double>("Amount");
+
+                    b.Property<string>("Article")
+                        .HasMaxLength(1000);
+
+                    b.Property<string>("ComodityCode")
+                        .HasMaxLength(500);
+
+                    b.Property<int>("ComodityId");
+
+                    b.Property<string>("ComodityName")
+                        .HasMaxLength(500);
+
+                    b.Property<int>("CostCalculationId");
+
+                    b.Property<string>("CreatedAgent")
+                        .IsRequired()
+                        .HasMaxLength(255);
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(255);
+
+                    b.Property<DateTime>("CreatedUtc");
+
+                    b.Property<string>("DeletedAgent")
+                        .IsRequired()
+                        .HasMaxLength(255);
+
+                    b.Property<string>("DeletedBy")
+                        .IsRequired()
+                        .HasMaxLength(255);
+
+                    b.Property<DateTime>("DeletedUtc");
+
+                    b.Property<DateTimeOffset>("DeliveryDate");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(3000);
+
+                    b.Property<bool>("IsDeleted");
+
+                    b.Property<string>("LastModifiedAgent")
+                        .IsRequired()
+                        .HasMaxLength(255);
+
+                    b.Property<string>("LastModifiedBy")
+                        .IsRequired()
+                        .HasMaxLength(255);
+
+                    b.Property<DateTime>("LastModifiedUtc");
+
+                    b.Property<string>("Material")
+                        .HasMaxLength(3000);
+
+                    b.Property<double>("Price");
+
+                    b.Property<double>("Quantity");
+
+                    b.Property<string>("RONumber")
+                        .HasMaxLength(255);
+
+                    b.Property<long>("SalesContractId");
+
+                    b.Property<string>("UId")
+                        .HasMaxLength(255);
+
+                    b.Property<string>("UomId");
+
+                    b.Property<string>("UomUnit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SalesContractId");
+
+                    b.ToTable("GarmentSalesContractROs");
                 });
 
             modelBuilder.Entity("Com.Ambassador.Service.Sales.Lib.Models.GarmentSewingBlockingPlanModel.GarmentSewingBlockingPlan", b =>
@@ -4754,9 +4822,17 @@ namespace Com.Ambassador.Service.Sales.Lib.Migrations
 
             modelBuilder.Entity("Com.Ambassador.Service.Sales.Lib.Models.GarmentSalesContractModel.GarmentSalesContractItem", b =>
                 {
-                    b.HasOne("Com.Ambassador.Service.Sales.Lib.Models.GarmentSalesContractModel.GarmentSalesContract", "GarmentSalesContract")
+                    b.HasOne("Com.Ambassador.Service.Sales.Lib.Models.GarmentSalesContractModel.GarmentSalesContractRO", "GarmentSalesContractRO")
                         .WithMany("Items")
-                        .HasForeignKey("GSCId")
+                        .HasForeignKey("SalesContractROId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Com.Ambassador.Service.Sales.Lib.Models.GarmentSalesContractModel.GarmentSalesContractRO", b =>
+                {
+                    b.HasOne("Com.Ambassador.Service.Sales.Lib.Models.GarmentSalesContractModel.GarmentSalesContract", "GarmentSalesContract")
+                        .WithMany("SalesContractROs")
+                        .HasForeignKey("SalesContractId")
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 

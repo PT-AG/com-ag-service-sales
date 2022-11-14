@@ -64,6 +64,11 @@ namespace Com.Ambassador.Service.Sales.Lib.ViewModels.CostCalculationGarment
         public long PreSCId { get; set; }
         public string PreSCNo { get; set; }
 
+        public int BookingOrderId { get; set; }
+        public string BookingOrderNo { get; set; }
+        public int? BOQuantity { get; set; }
+        public int BookingOrderItemId { get; set; }
+
         public Approval ApprovalMD { get; set; }
         public Approval ApprovalPurchasing { get; set; }
         public Approval ApprovalIE { get; set; }
@@ -123,6 +128,8 @@ namespace Com.Ambassador.Service.Sales.Lib.ViewModels.CostCalculationGarment
                 yield return new ValidationResult("Kuantitas harus diisi", new List<string> { "Quantity" });
             else if (this.Quantity <= 0)
                 yield return new ValidationResult("Kuantitas harus lebih besar dari 0", new List<string> { "Quantity" });
+            else if (this.Quantity > this.BOQuantity)
+                yield return new ValidationResult("Kuantitas tidak boleh lebih dari Remaining Confirm Quantity Booking Order", new List<string> { "Quantity" });
             else if (this.Efficiency == null || this.Efficiency.Id == 0)
                 yield return new ValidationResult("Tidak ditemukan Efisiensi pada kuantitas ini", new List<string> { "Quantity" });
             if (string.IsNullOrWhiteSpace(this.SizeRange))

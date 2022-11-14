@@ -144,6 +144,13 @@ namespace Com.Ambassador.Service.Sales.Lib.ViewModels.GarmentBookingOrderViewMod
                         ItemError += " ConfirmQuantity: 'Jumlah tidak boleh kurang dari 0' , ";
                     }
 
+                    var totalQuantity = Items.Sum(s => s.ConfirmQuantity);
+                    if (totalQuantity > this.OrderQuantity * 1.05)
+                    {
+                        Count++;
+                        ItemError += $"ConfirmQuantity: 'Alllowance Total Confirm Quantity Max 5% dari Order Quantity ({this.OrderQuantity * 1.05})', ";
+                    }
+
                     if (item.DeliveryDate == DateTimeOffset.MinValue || item.DeliveryDate == null)
                     {
                         Count++;

@@ -7,6 +7,7 @@ using Com.Ambassador.Service.Sales.Lib.Utilities;
 using Com.Ambassador.Service.Sales.Lib.ViewModels.GarmentBookingOrderViewModels;
 using Com.Ambassador.Service.Sales.WebApi.Helpers;
 using Com.Ambassador.Service.Sales.WebApi.Utilities;
+using Com.Danliris.Service.Sales.Lib.ViewModels.GarmentBookingOrderViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -81,6 +82,29 @@ namespace Com.Ambassador.Service.Sales.WebApi.Controllers
                     .Ok<GarmentBookingOrderViewModel>(Mapper, DataVM, page, size, read.Count, DataVM.Count, read.Order, read.Selected);
                 return Ok(Result);
 
+            }
+            catch (Exception e)
+            {
+                Dictionary<string, object> Result =
+                    new Utilities.ResultFormatter(ApiVersion, Common.INTERNAL_ERROR_STATUS_CODE, e.Message)
+                    .Fail();
+                return StatusCode(Common.INTERNAL_ERROR_STATUS_CODE, Result);
+            }
+        }
+
+        [HttpGet("read-by-no-for-ccg")]
+        public IActionResult GetForCCG(int page = 1, int size = 25, [Bind(Prefix = "Select[]")] List<string> select = null, string order = "{}", string keyword = null, string filter = "{}")
+        {
+            try
+            {
+                ReadResponse<GarmentBookingOrderForCCGViewModel> read = Facade.ReadByBookingOrderNoForCCG(page, size, order, select, keyword, filter);
+
+                List<GarmentBookingOrderForCCGViewModel> DataVM = Mapper.Map<List<GarmentBookingOrderForCCGViewModel>>(read.Data);
+
+                Dictionary<string, object> Result =
+                    new Utilities.ResultFormatter(ApiVersion, Common.OK_STATUS_CODE, Common.OK_MESSAGE)
+                    .Ok<GarmentBookingOrderForCCGViewModel>(Mapper, DataVM, page, size, read.Count, DataVM.Count, read.Order, read.Selected);
+                return Ok(Result);
             }
             catch (Exception e)
             {
