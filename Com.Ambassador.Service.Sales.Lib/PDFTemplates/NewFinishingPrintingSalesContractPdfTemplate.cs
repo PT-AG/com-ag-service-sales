@@ -444,7 +444,7 @@ namespace Com.Ambassador.Service.Sales.Lib.PDFTemplates
             two.Alignment = Element.ALIGN_JUSTIFIED;
             two.Leading = 13;
             bulletedlist.Add(two);
-            two = new ListItem("Jika Pembeli tidak mengembalikan Produk dalam waktu " + viewModel.LateReturn + " hari setelah diminta oleh Penjual, maka Pembeli memberikan kuasa mutrlak dan tidak dapat dicabut kepada Penjual untuk mengambil kembali Produk yang belum dibayar oleh Pembeli dalam kondisi utuh dan lengkap seperti waktu pengiriman dari Penjual, segala biaya yang timbul dalam proses tersebut ditanggung Pembeli.", normal_font);
+            two = new ListItem("Jika Pembeli tidak mengembalikan Produk dalam waktu " + viewModel.LateReturn + " hari setelah diminta oleh Penjual, maka Pembeli memberikan kuasa mutlak dan tidak dapat dicabut kepada Penjual untuk mengambil kembali Produk yang belum dibayar oleh Pembeli dalam kondisi utuh dan lengkap seperti waktu pengiriman dari Penjual, segala biaya yang timbul dalam proses tersebut ditanggung Pembeli.", normal_font);
             two.Alignment = Element.ALIGN_JUSTIFIED;
             two.Leading = 13;
             bulletedlist.Add(two);
@@ -459,7 +459,7 @@ namespace Com.Ambassador.Service.Sales.Lib.PDFTemplates
             List sublist3 = new List(List.ORDERED);
             sublist3.IndentationLeft = 10f;
             sublist3.PreSymbol = string.Format("{0}.", 3);
-            ListItem three = new ListItem("Jika Produk yang diterima Pembeli tidak seuai dengan kesepakatan, maka Pembeli wajib memberitahukan kepada Penjual, berikut dengan bukti yang cukup selambat-lambatnya " + viewModel.Claim + "(" + tanggalClaimTerbilang + ") hari setelah Produk diterima, selanjutnya klaim akan diselesaikan secara terpidah dan tidak dapat dihubungkan dan / atau diperhitungkan dengan pembayaran Produk dalam kontak Penjualan ini.", normal_font);
+            ListItem three = new ListItem("Jika Produk yang diterima Pembeli tidak seuai dengan kesepakatan, maka Pembeli wajib memberitahukan kepada Penjual, berikut dengan bukti yang cukup selambat-lambatnya " + viewModel.Claim + "(" + tanggalClaimTerbilang + ") hari setelah Produk diterima, selanjutnya klaim akan diselesaikan secara terpisah dan tidak dapat dihubungkan dan / atau diperhitungkan dengan pembayaran Produk dalam kontak Penjualan ini.", normal_font);
             three.Alignment = Element.ALIGN_JUSTIFIED;
             three.Leading = 13;
             sublist3.Add(three);
