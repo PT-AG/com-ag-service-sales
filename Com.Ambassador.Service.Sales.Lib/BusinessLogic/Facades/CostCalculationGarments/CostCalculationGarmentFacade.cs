@@ -151,12 +151,31 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Facades.CostCalculation
 
 		public async Task<int> UpdateAsync(int id, CostCalculationGarment model)
 		{
-            costCalculationGarmentLogic.UpdateAsync(id, model);
-            if (!string.IsNullOrWhiteSpace(model.ImageFile))
+            int Updated = 0;
+            using (var transaction = DbContext.Database.BeginTransaction())
             {
-                model.ImagePath = await this.AzureImageFacade.UploadImage(model.GetType().Name, model.Id, model.CreatedUtc, model.ImageFile);
+                try
+                {
+                     costCalculationGarmentLogic.UpdateAsync(id, model);
+
+                    if (!string.IsNullOrWhiteSpace(model.ImageFile))
+                    {
+                        model.ImagePath = await this.AzureImageFacade.UploadImage(model.GetType().Name, model.Id, model.CreatedUtc, model.ImageFile);
+                    }
+
+                    ////Create Log History
+                    //logHistoryLogic.Create("PENJUALAN", "Update Cost Calculation - " + model.RO_Number);
+
+                    Updated =  await DbContext.SaveChangesAsync();
+                    transaction.Commit();
+                }
+                catch (Exception e)
+                {
+                    transaction.Rollback();
+                    throw new Exception(e.Message);
+                }
             }
-            return await DbContext.SaveChangesAsync();
+            return Updated;
 		}
 
         public async Task<Dictionary<long, string>> GetProductNames(List<long> productIds)
