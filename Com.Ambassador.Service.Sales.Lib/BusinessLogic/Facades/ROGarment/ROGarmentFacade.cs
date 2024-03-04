@@ -47,33 +47,55 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Facades.ROGarment
 
         public async Task<int> CreateAsync(RO_Garment Model)
         {
-            do
-            {
-                Model.Code = Code.Generate();
-            }
-            while (this.DbSet.Any(d => d.Code.Equals(Model.Code)));
+            int Created = 0;
 
-            CostCalculationGarment costCalculationGarment = await costCalGarmentLogic.ReadByIdAsync((int)Model.CostCalculationGarment.Id); //Model.CostCalculationGarment;
-            foreach(var item in costCalculationGarment.CostCalculationGarment_Materials)
+            using (var transaction = DbContext.Database.BeginTransaction())
             {
-                foreach(var itemModel in Model.CostCalculationGarment.CostCalculationGarment_Materials)
+                try
                 {
-                    if(item.Id == itemModel.Id)
+                    CostCalculationGarment costCalculationGarment = await costCalGarmentLogic.ReadByIdAsync((int)Model.CostCalculationGarment.Id); //Model.CostCalculationGarment;
+                    foreach (var item in costCalculationGarment.CostCalculationGarment_Materials)
                     {
-                        item.Information = itemModel.Information;
+                        foreach (var itemModel in Model.CostCalculationGarment.CostCalculationGarment_Materials)
+                        {
+                            if (item.Id == itemModel.Id)
+                            {
+                                item.Information = itemModel.Information;
+                            }
+                        }
                     }
+
+                    do
+                    {
+                        Model.Code = Code.Generate();
+                    }
+                    while (this.DbSet.Any(d => d.Code.Equals(Model.Code)));
+
+                    Model.CostCalculationGarment = null;
+
+                    roGarmentLogic.Create(Model);
+
+
+                    Model.ImagesPath = await AzureImageFacade.UploadMultipleImage(Model.GetType().Name, (int)Model.Id, Model.CreatedUtc, Model.ImagesFile, Model.ImagesPath);
+                    Model.DocumentsPath = await AzureDocumentFacade.UploadMultipleFile(Model.GetType().Name, (int)Model.Id, Model.CreatedUtc, Model.DocumentsFile, Model.DocumentsFileName, Model.DocumentsPath);
+                    await DbContext.SaveChangesAsync();
+                    //Update CC
+                    costCalculationGarment.RO_GarmentId = (int)Model.Id;
+
+                    Created = await DbContext.SaveChangesAsync();
+
+                    transaction.Commit();
                 }
-            }   
-            Model.CostCalculationGarment = null;
+                catch (Exception e)
+                {
+                    transaction.Rollback();
+                    throw new Exception(e.Message);
+                }
 
-            roGarmentLogic.Create(Model);
-            int created = await DbContext.SaveChangesAsync();
+            }
 
-            Model.ImagesPath = await AzureImageFacade.UploadMultipleImage(Model.GetType().Name, (int)Model.Id, Model.CreatedUtc, Model.ImagesFile, Model.ImagesPath);
-            Model.DocumentsPath = await AzureDocumentFacade.UploadMultipleFile(Model.GetType().Name, (int)Model.Id, Model.CreatedUtc, Model.DocumentsFile, Model.DocumentsFileName, Model.DocumentsPath);
-
-            await UpdateCostCalAsync(costCalculationGarment, (int)Model.Id);
-            return created;
+            //return Created += await UpdateCostCalAsync(costCalculationGarment, (int)Model.Id); 
+            return Created;
         }
 
         public async Task<int> UpdateCostCalAsync(CostCalculationGarment costCalculationGarment, int Id)
@@ -86,15 +108,40 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Facades.ROGarment
 
         public async Task<int> DeleteAsync(int id)
         {
+            int Deleted = 0;
+
             RO_Garment deletedImage = await this.ReadByIdAsync(id);
-            await this.AzureImageFacade.RemoveMultipleImage(deletedImage.GetType().Name, deletedImage.ImagesPath);
-            await this.AzureDocumentFacade.RemoveMultipleFile(deletedImage.GetType().Name, deletedImage.DocumentsPath);
+            using (var transaction = DbContext.Database.BeginTransaction())
+            {
+                try
+                {
 
-            await roGarmentLogic.DeleteAsync(id);
-            int deleted = await DbContext.SaveChangesAsync();
+                    await this.AzureImageFacade.RemoveMultipleImage(deletedImage.GetType().Name, deletedImage.ImagesPath);
+                    await this.AzureDocumentFacade.RemoveMultipleFile(deletedImage.GetType().Name, deletedImage.DocumentsPath);
 
-            await DeletedROCostCalAsync(deletedImage.CostCalculationGarment, (int)deletedImage.CostCalculationGarmentId);
-            return deleted;
+                    //Update CC
+                    CostCalculationGarment costCal = await costCalGarmentLogic.ReadByIdAsync((int)deletedImage.CostCalculationGarment.Id); //Model.CostCalculationGarment;
+
+                    costCal.RO_GarmentId = null;
+                    costCal.ImageFile = string.IsNullOrWhiteSpace(costCal.ImageFile) ? "#" : costCal.ImageFile;
+                    foreach (var item in costCal.CostCalculationGarment_Materials)
+                    {
+                        item.Information = null;
+                    }
+                    //
+                    await roGarmentLogic.DeleteAsync(id);
+
+                    Deleted = await DbContext.SaveChangesAsync();
+                    transaction.Commit();
+                }
+                catch (Exception e)
+                {
+                    transaction.Rollback();
+                    throw new Exception(e.Message);
+                }
+
+            }
+            return Deleted;
         }
 
         public async Task<int> DeletedROCostCalAsync(CostCalculationGarment costCalculationGarment, int Id)
@@ -148,17 +195,43 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Facades.ROGarment
 
         public async Task<int> UpdateAsync(int id, RO_Garment Model)
         {
-            CostCalculationGarment costCalculationGarment = Model.CostCalculationGarment;
-            Model.CostCalculationGarment = null;
+            int Updated = 0;
 
-            Model.ImagesPath = await this.AzureImageFacade.UploadMultipleImage(Model.GetType().Name, (int)Model.Id, Model.CreatedUtc, Model.ImagesFile, Model.ImagesPath);
-            Model.DocumentsPath = await AzureDocumentFacade.UploadMultipleFile(Model.GetType().Name, (int)Model.Id, Model.CreatedUtc, Model.DocumentsFile, Model.DocumentsFileName, Model.DocumentsPath);
+            CostCalculationGarment oldCC = Model.CostCalculationGarment;
 
-            roGarmentLogic.UpdateAsync(id,Model);
-            int updated = await DbContext.SaveChangesAsync();
+            using (var transaction = DbContext.Database.BeginTransaction())
+            {
+                try
+                {
+                    CostCalculationGarment costCalculationGarment = await costCalGarmentLogic.ReadByIdAsync((int)Model.CostCalculationGarmentId); //Model.CostCalculationGarment;
+                    Model.CostCalculationGarment = null;
 
-            await UpdateCostCalAsync(costCalculationGarment, (int)Model.Id);
-            return updated;
+                    Model.ImagesPath = await this.AzureImageFacade.UploadMultipleImage(Model.GetType().Name, (int)Model.Id, Model.CreatedUtc, Model.ImagesFile, Model.ImagesPath);
+                    Model.DocumentsPath = await AzureDocumentFacade.UploadMultipleFile(Model.GetType().Name, (int)Model.Id, Model.CreatedUtc, Model.DocumentsFile, Model.DocumentsFileName, Model.DocumentsPath);
+
+                    roGarmentLogic.UpdateAsync(id, Model);
+
+                    await DbContext.SaveChangesAsync();
+                    //Update CC
+                    costCalculationGarment.RO_GarmentId = (int)Model.Id;
+                    foreach (var item in costCalculationGarment.CostCalculationGarment_Materials)
+                    {
+                        var matchCC = oldCC.CostCalculationGarment_Materials.FirstOrDefault(x => x.Id == item.Id);
+                        item.Information = matchCC.Information;
+                    }
+
+                    Updated = await DbContext.SaveChangesAsync();
+
+                    transaction.Commit();
+                }
+                catch (Exception e)
+                {
+                    transaction.Rollback();
+                    throw new Exception(e.Message);
+                }
+            }
+            return Updated;
+            //return Updated += await UpdateCostCalAsync(costCalculationGarment, (int)Model.Id); 
         }
 
         public async Task<int> PostRO(List<long> listId)
