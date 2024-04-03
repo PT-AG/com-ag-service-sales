@@ -72,84 +72,58 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Facades.Garment
                 }
                 dataTable.Rows.Add(null, null, null, null, null, null, null, null, null, null, null);
                 dataTable.Rows.Add(null, null, null, null, null, null, null, null, null, null, null);
-                var leadTime = data[0].LeadTime;
-                var Percent35Ok = "";
-                var Percent35NotOk = "";
-                var Percent25Ok = "";
-                var Percent25NotOk = "";
-                var PercentOk = "";
-                var PercentNotOk = "";
-                var Count35 = 0;
-                var Count35Ok = 0;
-                var Count35NotOk = 0;
-                var Count25 = 0;
-                var Count25Ok = 0;
-                var Count25NotOk = 0;
+                var leadTime = "25";
 
-                foreach(var q in data)
-                {
-                    if (q.LeadTime == 35)
-                    {
-                        Count35 = data.Count(d => d.LeadTime == 35);
-                        Count35Ok = data.Count(d => d.DateDiff >= 35 && d.LeadTime == 35);
-                        Count35NotOk = data.Count(d => d.DateDiff < 35 && d.LeadTime == 35);
-                        //if (Count35Ok > 0)
-                        //{
-                            Percent35Ok = ((decimal)Count35Ok / Count35).ToString("P", new CultureInfo("id-ID"));
-                        //}
-                        //else
-                        //{
-                            Percent35NotOk = ((decimal)Count35NotOk / Count35).ToString("P", new CultureInfo("id-ID"));
-                        //}
-                    }
-                    else if (q.LeadTime == 25)
-                    {
-                        Count25 = data.Count(d => d.LeadTime == 25);
-                        Count25Ok = data.Count(d => d.DateDiff >= 20 && d.LeadTime == 25);
-                        Count25NotOk = data.Count(d => d.DateDiff < 20 && d.LeadTime == 25);
-                        //if (Count25Ok > 0)
-                        //{
-                            Percent25Ok = ((decimal)Count25Ok / Count25).ToString("P", new CultureInfo("id-ID"));
-                        //}
-                        //else
-                        //{
-                            Percent25NotOk = ((decimal)Count25NotOk / Count25).ToString("P", new CultureInfo("id-ID"));
-                        //}
-                    }
-                }
+                //LEAD 35
+                var Count35 = data.Count(d => d.LeadTime == 35);
+                var Count35Ok = data.Count(d => d.DateDiff >= 30 && d.LeadTime == 35);
+                var Percent35Ok = ((decimal)Count35Ok / Count35).ToString("P", new CultureInfo("id-ID"));
+                var Count35NotOk = data.Count(d => d.DateDiff < 30 && d.LeadTime == 35);
+                var Percent35NotOk = ((decimal)Count35NotOk / Count35).ToString("P", new CultureInfo("id-ID"));
 
-                var Count = Count25 + Count35; 
-                var CountOk = Count35Ok + Count25Ok;
-                var CountNotOk = Count35NotOk + Count25NotOk;
-                //if (CountOk > 0){
-                    PercentOk = ((decimal)CountOk / Count).ToString("P", new CultureInfo("id-ID"));
-                //} else {
-                    PercentNotOk = ((decimal)CountNotOk / Count).ToString("P", new CultureInfo("id-ID"));
-                //}
+                //LEAD 30
+                var Count30 = data.Count(d => d.LeadTime == 30);
+                var Count30Ok = data.Count(d => d.DateDiff >= 25 && d.LeadTime == 30);
+                var Percent30Ok = ((decimal)Count30Ok / Count30).ToString("P", new CultureInfo("id-ID"));
+                var Count30NotOk = data.Count(d => d.DateDiff < 25 && d.LeadTime == 30);
+                var Percent30NotOk = ((decimal)Count30NotOk / Count30).ToString("P", new CultureInfo("id-ID"));
+
+                //LEAD 25
+                var Count25 = data.Count(d => d.LeadTime == 25);
+                var Count25Ok = data.Count(d => d.DateDiff >= 20 && d.LeadTime == 25);
+                var Percent25Ok = ((decimal)Count25Ok / Count25).ToString("P", new CultureInfo("id-ID"));
+                var Count25NotOk = data.Count(d => d.DateDiff < 20 && d.LeadTime == 25);
+                var Percent25NotOk = ((decimal)Count25NotOk / Count25).ToString("P", new CultureInfo("id-ID"));
+
+                var Count = Count25 + Count30 + Count35;
+                var CountOk = Count35Ok + Count30Ok + Count25Ok;
+                var PercentOk = ((decimal)CountOk / Count).ToString("P", new CultureInfo("id-ID"));
+                var CountNotOk = Count35NotOk + Count30NotOk + Count25NotOk;
+                var PercentNotOk = ((decimal)CountNotOk / Count).ToString("P", new CultureInfo("id-ID"));
 
                 dataTable.Rows.Add(null, "KESIAPAN RO GARMENT DENGAN LEAD TIME  " + leadTime + "  HARI", null, null, null, null, null, null, null, null, null);
                 dataTable.Rows.Add(null, "Status OK", null, "Selisih Tgl Penerimaan RO dengan Tgl Shipment >=  " + leadTime + "  hari", null, null, null, null, null, null, null);
-                dataTable.Rows.Add(null, "Persentase Status OK", null, $"{Count35Ok}/{Count35} X 100% = {Percent35Ok}", null, null, null, null, null, null, null);
-                dataTable.Rows.Add(null, "Status NOT OK", null, "Selisih Tgl Penerimaan RO dengan Tgl Shipment <  " + leadTime + "  hari", null, null, null, null, null, null, null);
-                dataTable.Rows.Add(null, "Persentase Status NOT OK", null, $"{Count35NotOk}/{Count35} X 100% = {Percent35NotOk}", null, null, null, null, null, null, null);
-
-                dataTable.Rows.Add(null, null, null, null, null, null, null, null, null, null, null);
-                dataTable.Rows.Add(null, null, null, null, null, null, null, null, null, null, null);
-
-                dataTable.Rows.Add(null, "KESIAPAN RO GARMENT DENGAN LEAD TIME 25 HARI", null, null, null, null, null, null, null, null, null);
-                dataTable.Rows.Add(null, "Status OK", null, "Selisih Tgl Penerimaan RO dengan Tgl Shipment >= 20 hari", null, null, null, null, null, null, null);
-                dataTable.Rows.Add(null, "Persentase Status OK", null, $"{Count25Ok}/{Count25} X 100% = {Percent25Ok}", null, null, null, null, null, null, null);
-                dataTable.Rows.Add(null, "Status NOT OK", null, "Selisih Tgl Penerimaan RO dengan Tgl Shipment < 20 hari", null, null, null, null, null, null, null);
-                dataTable.Rows.Add(null, "Persentase Status NOT OK", null, $"{Count25NotOk}/{Count25} X 100% = {Percent25NotOk}", null, null, null, null, null, null, null);
-
-                dataTable.Rows.Add(null, null, null, null, null, null, null, null, null, null, null);
-                dataTable.Rows.Add(null, null, null, null, null, null, null, null, null, null, null);
-
-                dataTable.Rows.Add(null, "AKUMULASI KESIAPAN RO GARMENT", null, null, null, null, null, null, null, null, null);
-                dataTable.Rows.Add(null, "Status OK", null, null, null, null, null, null, null, null, null);
                 dataTable.Rows.Add(null, "Persentase Status OK", null, $"{CountOk}/{Count} X 100% = {PercentOk}", null, null, null, null, null, null, null);
-                dataTable.Rows.Add(null, "Status NOT OK", null, null, null, null, null, null, null, null, null);
+                dataTable.Rows.Add(null, "Status NOT OK", null, "Selisih Tgl Penerimaan RO dengan Tgl Shipment <  " + leadTime + "  hari", null, null, null, null, null, null, null);
                 dataTable.Rows.Add(null, "Persentase Status NOT OK", null, $"{CountNotOk}/{Count} X 100% = {PercentNotOk}", null, null, null, null, null, null, null);
+
+                //dataTable.Rows.Add(null, null, null, null, null, null, null, null, null, null, null);
+                //dataTable.Rows.Add(null, null, null, null, null, null, null, null, null, null, null);
+
+                //dataTable.Rows.Add(null, "KESIAPAN RO GARMENT DENGAN LEAD TIME 25 HARI", null, null, null, null, null, null, null, null, null);
+                //dataTable.Rows.Add(null, "Status OK", null, "Selisih Tgl Penerimaan RO dengan Tgl Shipment >= 20 hari", null, null, null, null, null, null, null);
+                //dataTable.Rows.Add(null, "Persentase Status OK", null, $"{Count25Ok}/{Count25} X 100% = {Percent25Ok}", null, null, null, null, null, null, null);
+                //dataTable.Rows.Add(null, "Status NOT OK", null, "Selisih Tgl Penerimaan RO dengan Tgl Shipment < 20 hari", null, null, null, null, null, null, null);
+                //dataTable.Rows.Add(null, "Persentase Status NOT OK", null, $"{Count25NotOk}/{Count25} X 100% = {Percent25NotOk}", null, null, null, null, null, null, null);
+
+                //dataTable.Rows.Add(null, null, null, null, null, null, null, null, null, null, null);
+                //dataTable.Rows.Add(null, null, null, null, null, null, null, null, null, null, null);
+
+                //dataTable.Rows.Add(null, "AKUMULASI KESIAPAN RO GARMENT", null, null, null, null, null, null, null, null, null);
+                //dataTable.Rows.Add(null, "Status OK", null, null, null, null, null, null, null, null, null);
+                //dataTable.Rows.Add(null, "Persentase Status OK", null, $"{CountOk}/{Count} X 100% = {PercentOk}", null, null, null, null, null, null, null);
+                //dataTable.Rows.Add(null, "Status NOT OK", null, null, null, null, null, null, null, null, null);
+                //dataTable.Rows.Add(null, "Persentase Status NOT OK", null, $"{CountNotOk}/{Count} X 100% = {PercentNotOk}", null, null, null, null, null, null, null);
 
                 i += 3;
                 mergeCells.Add(($"B{++i}:K{i}", ExcelHorizontalAlignment.Left, ExcelVerticalAlignment.Bottom));
@@ -166,7 +140,7 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Facades.Garment
 
             var excel = Excel.CreateExcel(new List<(DataTable, string, List<(string, Enum, Enum)>)>() { (dataTable, "AvailableROGarment", mergeCells) }, false);
 
-            return Tuple.Create(excel, string.Concat("Laporan Kesiapan RO Garment", GetSuffixNameFromFilter(filter)));
+            return Tuple.Create(excel, string.Concat("Laporan Kesiapan RO Garment", GetSuffixNameFromFilter(filter), ".xlsx"));
         }
 
         private string GetSuffixNameFromFilter(string filterString)
