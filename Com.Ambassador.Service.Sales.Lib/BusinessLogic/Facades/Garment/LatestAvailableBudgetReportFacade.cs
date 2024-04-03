@@ -61,12 +61,12 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Facades.Garment
                 dataTable.Rows.Add(null, null, null, null, null, null, null, null, null, null, null, null, null);
                 dataTable.Rows.Add(null, null, null, null, null, null, null, null, null, null, null, null, null);
 
-                var Count35 = data.Count(d => d.LeadTime == 35);
-                var Count35Ok = data.Count(d => d.DateDiff >= 35 && d.LeadTime == 35);
+                var Count35 = data.Count(d => d.LeadTime == 30);
+                var Count35Ok = data.Count(d => d.DateDiff >= 30 && d.LeadTime == 30);
                 var Percent35Ok = ((decimal)Count35Ok / Count35).ToString("P", new CultureInfo("id-ID"));
-                var Count35NotOk = data.Count(d => d.DateDiff < 35 && d.LeadTime == 35);
+                var Count35NotOk = data.Count(d => d.DateDiff < 30 && d.LeadTime == 30);
                 var Percent35NotOk = ((decimal)Count35NotOk / Count35).ToString("P", new CultureInfo("id-ID"));
-                var leadTime = data[0].LeadTime;
+                var leadTime ="30";
                 //var Count25 = data.Count(d => d.LeadTime == 25);
                 //var Count25Ok = data.Count(d => d.DateDiff >= 25 && d.LeadTime == 25);
                 //var Percent25Ok = ((decimal)Count25Ok / Count25).ToString("P", new CultureInfo("id-ID"));
