@@ -60,49 +60,59 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Facades.Garment
                 }
                 dataTable.Rows.Add(null, null, null, null, null, null, null, null, null, null, null, null, null);
                 dataTable.Rows.Add(null, null, null, null, null, null, null, null, null, null, null, null, null);
+                var leadTime = "30";
 
-                var Count35 = data.Count(d => d.LeadTime == 30);
-                var Count35Ok = data.Count(d => d.DateDiff >= 30 && d.LeadTime == 30);
+                //LEAD 35
+                var Count35 = data.Count(d => d.LeadTime == 35);
+                var Count35Ok = data.Count(d => d.DateDiff >= 35 && d.LeadTime == 35);
                 var Percent35Ok = ((decimal)Count35Ok / Count35).ToString("P", new CultureInfo("id-ID"));
-                var Count35NotOk = data.Count(d => d.DateDiff < 30 && d.LeadTime == 30);
+                var Count35NotOk = data.Count(d => d.DateDiff < 35 && d.LeadTime == 35);
                 var Percent35NotOk = ((decimal)Count35NotOk / Count35).ToString("P", new CultureInfo("id-ID"));
-                var leadTime ="30";
-                //var Count25 = data.Count(d => d.LeadTime == 25);
-                //var Count25Ok = data.Count(d => d.DateDiff >= 25 && d.LeadTime == 25);
-                //var Percent25Ok = ((decimal)Count25Ok / Count25).ToString("P", new CultureInfo("id-ID"));
-                //var Count25NotOk = data.Count(d => d.DateDiff < 25 && d.LeadTime == 25);
-                //var Percent25NotOk = ((decimal)Count25NotOk / Count25).ToString("P", new CultureInfo("id-ID"));
 
-                var Count = Count25 + Count35;
-                var CountOk = Count35Ok + Count25Ok;
+
+                //LEAD 30
+                var Count30 = data.Count(d => d.LeadTime == 30);
+                var Count30Ok = data.Count(d => d.DateDiff >= 30 && d.LeadTime == 30);
+                var Percent30Ok = ((decimal)Count30Ok / Count30).ToString("P", new CultureInfo("id-ID"));
+                var Count30NotOk = data.Count(d => d.DateDiff < 30 && d.LeadTime == 30);
+                var Percent30NotOk = ((decimal)Count30NotOk / Count30).ToString("P", new CultureInfo("id-ID"));
+
+                //LEAD 25
+                var Count25 = data.Count(d => d.LeadTime == 25);
+                var Count25Ok = data.Count(d => d.DateDiff >= 25 && d.LeadTime == 25);
+                var Percent25Ok = ((decimal)Count25Ok / Count25).ToString("P", new CultureInfo("id-ID"));
+                var Count25NotOk = data.Count(d => d.DateDiff < 25 && d.LeadTime == 25);
+                var Percent25NotOk = ((decimal)Count25NotOk / Count25).ToString("P", new CultureInfo("id-ID"));
+
+                var Count = Count25 + Count30 + Count35;
+                var CountOk = Count35Ok + Count30Ok + Count25Ok;
                 var PercentOk = ((decimal)CountOk / Count).ToString("P", new CultureInfo("id-ID"));
-                var CountNotOk = Count35NotOk + Count25NotOk;
+                var CountNotOk = Count35NotOk + Count30NotOk + Count25NotOk;
                 var PercentNotOk = ((decimal)CountNotOk / Count).ToString("P", new CultureInfo("id-ID"));
-
 
                 dataTable.Rows.Add(null, "KESIAPAN BUDGET DENGAN LEAD TIME " +leadTime+ " HARI", null, null, null, null, null, null, null, null, null, null, null);
                 dataTable.Rows.Add(null, "Status OK", null, "Selisih Tgl Kesiapan Budget dengan Tgl Shipment >=  " + leadTime + " hari", null, null, null, null, null, null, null, null, null);
-                dataTable.Rows.Add(null, "Persentase Status OK", null, $"{Count35Ok}/{Count35} X 100% = {Percent35Ok}", null, null, null, null, null, null, null, null, null);
-                dataTable.Rows.Add(null, "Status NOT OK", null, "Selisih Tgl Kesiapan Budget dengan Tgl Shipment <  " + leadTime + " hari", null, null, null, null, null, null, null, null, null);
-                dataTable.Rows.Add(null, "Persentase Status NOT OK", null, $"{Count35NotOk}/{Count35} X 100% = {Percent35NotOk}", null, null, null, null, null, null, null, null, null);
-
-                dataTable.Rows.Add(null, null, null, null, null, null, null, null, null, null, null, null, null);
-                dataTable.Rows.Add(null, null, null, null, null, null, null, null, null, null, null, null, null);
-
-                dataTable.Rows.Add(null, "KESIAPAN BUDGET DENGAN LEAD TIME 25 HARI", null, null, null, null, null, null, null, null, null, null, null);
-                dataTable.Rows.Add(null, "Status OK", null, "Selisih Tgl Kesiapan Budget dengan Tgl Shipment >= 25 hari", null, null, null, null, null, null, null, null, null);
-                dataTable.Rows.Add(null, "Persentase Status OK", null, $"{Count25Ok}/{Count25} X 100% = {Percent25Ok}", null, null, null, null, null, null, null, null, null);
-                dataTable.Rows.Add(null, "Status NOT OK", null, "Selisih Tgl Kesiapan Budget dengan Tgl Shipment < 25 hari", null, null, null, null, null, null, null, null, null);
-                dataTable.Rows.Add(null, "Persentase Status NOT OK", null, $"{Count25NotOk}/{Count25} X 100% = {Percent25NotOk}", null, null, null, null, null, null, null, null, null);
-
-                dataTable.Rows.Add(null, null, null, null, null, null, null, null, null, null, null, null, null);
-                dataTable.Rows.Add(null, null, null, null, null, null, null, null, null, null, null, null, null);
-
-                dataTable.Rows.Add(null, "AKUMULASI KESIAPAN BUDGET", null, null, null, null, null, null, null, null, null, null, null);
-                dataTable.Rows.Add(null, "Status OK", null, null, null, null, null, null, null, null, null, null, null);
                 dataTable.Rows.Add(null, "Persentase Status OK", null, $"{CountOk}/{Count} X 100% = {PercentOk}", null, null, null, null, null, null, null, null, null);
-                dataTable.Rows.Add(null, "Status NOT OK", null, null, null, null, null, null, null, null, null, null, null);
+                dataTable.Rows.Add(null, "Status NOT OK", null, "Selisih Tgl Kesiapan Budget dengan Tgl Shipment <  " + leadTime + " hari", null, null, null, null, null, null, null, null, null);
                 dataTable.Rows.Add(null, "Persentase Status NOT OK", null, $"{CountNotOk}/{Count} X 100% = {PercentNotOk}", null, null, null, null, null, null, null, null, null);
+
+                //dataTable.Rows.Add(null, null, null, null, null, null, null, null, null, null, null, null, null);
+                //dataTable.Rows.Add(null, null, null, null, null, null, null, null, null, null, null, null, null);
+
+                //dataTable.Rows.Add(null, "KESIAPAN BUDGET DENGAN LEAD TIME 25 HARI", null, null, null, null, null, null, null, null, null, null, null);
+                //dataTable.Rows.Add(null, "Status OK", null, "Selisih Tgl Kesiapan Budget dengan Tgl Shipment >= 25 hari", null, null, null, null, null, null, null, null, null);
+                //dataTable.Rows.Add(null, "Persentase Status OK", null, $"{Count25Ok}/{Count25} X 100% = {Percent25Ok}", null, null, null, null, null, null, null, null, null);
+                //dataTable.Rows.Add(null, "Status NOT OK", null, "Selisih Tgl Kesiapan Budget dengan Tgl Shipment < 25 hari", null, null, null, null, null, null, null, null, null);
+                //dataTable.Rows.Add(null, "Persentase Status NOT OK", null, $"{Count25NotOk}/{Count25} X 100% = {Percent25NotOk}", null, null, null, null, null, null, null, null, null);
+
+                //dataTable.Rows.Add(null, null, null, null, null, null, null, null, null, null, null, null, null);
+                //dataTable.Rows.Add(null, null, null, null, null, null, null, null, null, null, null, null, null);
+
+                //dataTable.Rows.Add(null, "AKUMULASI KESIAPAN BUDGET", null, null, null, null, null, null, null, null, null, null, null);
+                //dataTable.Rows.Add(null, "Status OK", null, null, null, null, null, null, null, null, null, null, null);
+                //dataTable.Rows.Add(null, "Persentase Status OK", null, $"{CountOk}/{Count} X 100% = {PercentOk}", null, null, null, null, null, null, null, null, null);
+                //dataTable.Rows.Add(null, "Status NOT OK", null, null, null, null, null, null, null, null, null, null, null);
+                //dataTable.Rows.Add(null, "Persentase Status NOT OK", null, $"{CountNotOk}/{Count} X 100% = {PercentNotOk}", null, null, null, null, null, null, null, null, null);
 
                 i += 3;
                 mergeCells.Add(($"B{++i}:K{i}", ExcelHorizontalAlignment.Left, ExcelVerticalAlignment.Bottom));
@@ -119,7 +129,7 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Facades.Garment
 
             var excel = Excel.CreateExcel(new List<(DataTable, string, List<(string, Enum, Enum)>)>() { (dataTable, "AvailableBudget", mergeCells) }, false);
 
-            return Tuple.Create(excel, string.Concat("Laporan Kesiapan Budget", GetSuffixNameFromFilter(filter)));
+            return Tuple.Create(excel, string.Concat("Laporan Kesiapan Budget", GetSuffixNameFromFilter(filter), ".xlsx"));
         }
 
         private string GetSuffixNameFromFilter(string filterString)
