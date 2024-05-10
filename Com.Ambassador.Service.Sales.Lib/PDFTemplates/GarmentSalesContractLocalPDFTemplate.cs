@@ -99,7 +99,7 @@ namespace Com.Ambassador.Service.Sales.Lib.PDFTemplates
             tableBodyBuyer.AddCell(bodyContentLefts);
             bodyContentLefts.Phrase = new Phrase("", normal_font);
             tableBodyBuyer.AddCell(bodyContentLefts);
-            bodyContentLefts.Phrase = new Phrase("Pekerjaan ", normal_font);
+            bodyContentLefts.Phrase = new Phrase("Jabatan ", normal_font);
             tableBodyBuyer.AddCell(bodyContentLefts);
             bodyContentLefts.Phrase = new Phrase(":" + " " + viewModel.RecipientJob, normal_font);
             tableBodyBuyer.AddCell(bodyContentLefts);
