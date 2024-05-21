@@ -308,7 +308,7 @@ namespace Com.Ambassador.Service.Sales.Lib.PDFTemplates
             PdfPCell cellDetailOrder = new PdfPCell() { MinimumHeight = 10, Border = Rectangle.BOTTOM_BORDER | Rectangle.LEFT_BORDER | Rectangle.RIGHT_BORDER | Rectangle.TOP_BORDER, HorizontalAlignment = Element.ALIGN_MIDDLE };
             PdfPCell CellDetailCenter = new PdfPCell() { MinimumHeight = 10, Border = Rectangle.BOTTOM_BORDER | Rectangle.LEFT_BORDER | Rectangle.RIGHT_BORDER | Rectangle.TOP_BORDER, HorizontalAlignment = Element.ALIGN_CENTER };
            
-            cellDetailOrder.Phrase = new Phrase("FOB", bold_font);
+            cellDetailOrder.Phrase = new Phrase("FOB/CMT/CM", bold_font);
             tableDetailOrder.AddCell(cellDetailOrder);
             CellDetailCenter.Phrase = new Phrase(viewModel.FOB, normal_font);
             tableDetailOrder.AddCell(CellDetailCenter);
