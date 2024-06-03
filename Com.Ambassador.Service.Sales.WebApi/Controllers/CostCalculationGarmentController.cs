@@ -18,6 +18,8 @@ using Com.Ambassador.Service.Sales.Lib.PDFTemplates;
 using Com.Ambassador.Service.Sales.Lib.Helpers;
 using Microsoft.AspNetCore.JsonPatch;
 using Com.Ambassador.Service.Sales.Lib.Utilities;
+using Microsoft.Extensions.DependencyInjection;
+using Com.Ambassador.Service.Sales.Lib.ViewModels.IntegrationViewModel;
 
 namespace Com.Ambassador.Service.Sales.WebApi.Controllers
 {
@@ -29,10 +31,12 @@ namespace Com.Ambassador.Service.Sales.WebApi.Controllers
 	{
 		private readonly static string apiVersion = "1.0";
 		private readonly IIdentityService Service;
-		public CostCalculationGarmentController(IIdentityService identityService, IValidateService validateService, ICostCalculationGarment facade, IMapper mapper, IServiceProvider serviceProvider) : base(identityService, validateService, facade, mapper, apiVersion)
+        private readonly IHttpClientService HttpClientService;
+        public CostCalculationGarmentController(IIdentityService identityService, IValidateService validateService, ICostCalculationGarment facade, IMapper mapper, IServiceProvider serviceProvider) : base(identityService, validateService, facade, mapper, apiVersion)
 		{
 			Service = identityService;
-		}
+            HttpClientService = serviceProvider.GetService<IHttpClientService>();
+        }
 
         [HttpGet("dynamic")]
         public IActionResult GetDynamic(int page = 1, int size = 25, string order = "{}", string select = null, string keyword = null, string filter = "{}", string search = "[]")
@@ -104,10 +108,16 @@ namespace Com.Ambassador.Service.Sales.WebApi.Controllers
 				}
 				else
 				{
-					CostCalculationGarmentPdfTemplate PdfTemplate = new CostCalculationGarmentPdfTemplate();
-					MemoryStream stream = PdfTemplate.GeneratePdfTemplate(viewModel, timeoffsset);
+                    //Get GarmentCategory
+                    List<GarmentCategoryViewModel> garmentCategoryViewModel;
+                    var response = HttpClientService.GetAsync($@"{Lib.Helpers.APIEndpoint.Core}master/garment-categories?size=10000").Result.Content.ReadAsStringAsync();
+                    Dictionary<string, object> result = JsonConvert.DeserializeObject<Dictionary<string, object>>(response.Result);
+                    garmentCategoryViewModel = JsonConvert.DeserializeObject<List<GarmentCategoryViewModel>>(result.GetValueOrDefault("data").ToString());
 
-					return new FileStreamResult(stream, "application/pdf")
+                    CostCalculationGarmentPdfTemplate PdfTemplate = new CostCalculationGarmentPdfTemplate();
+                    MemoryStream stream = PdfTemplate.GeneratePdfTemplate(viewModel, timeoffsset, garmentCategoryViewModel);
+
+                    return new FileStreamResult(stream, "application/pdf")
 					{
 						FileDownloadName = "Cost Calculation Garment " + viewModel.RO_Number + (viewModel.IsPosted ? "" : " - DRAFT") + ".pdf"
 					};
@@ -137,8 +147,16 @@ namespace Com.Ambassador.Service.Sales.WebApi.Controllers
 
 				int timeoffsset = Convert.ToInt32(Request.Headers["x-timezone-offset"]);
 
-				CostCalculationGarmentBudgetPdfTemplate PdfTemplate = new CostCalculationGarmentBudgetPdfTemplate();
-				MemoryStream stream = PdfTemplate.GeneratePdfTemplate(viewModel, timeoffsset);
+
+                //Get GarmentCategory
+                List<GarmentCategoryViewModel> garmentCategoryViewModel;
+                var response = HttpClientService.GetAsync($@"{Lib.Helpers.APIEndpoint.Core}master/garment-categories?size=10000").Result.Content.ReadAsStringAsync();
+                Dictionary<string, object> result = JsonConvert.DeserializeObject<Dictionary<string, object>>(response.Result);
+                garmentCategoryViewModel = JsonConvert.DeserializeObject<List<GarmentCategoryViewModel>>(result.GetValueOrDefault("data").ToString());
+
+
+                CostCalculationGarmentBudgetPdfTemplate PdfTemplate = new CostCalculationGarmentBudgetPdfTemplate();
+				MemoryStream stream = PdfTemplate.GeneratePdfTemplate(viewModel, timeoffsset, garmentCategoryViewModel);
 
 				return new FileStreamResult(stream, "application/pdf")
 				{

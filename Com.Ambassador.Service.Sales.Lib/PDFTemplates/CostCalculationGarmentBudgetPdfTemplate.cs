@@ -1,5 +1,6 @@
 ﻿using Com.Ambassador.Service.Sales.Lib.Helpers;
 using Com.Ambassador.Service.Sales.Lib.ViewModels.CostCalculationGarment;
+using Com.Ambassador.Service.Sales.Lib.ViewModels.IntegrationViewModel;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 using System;
@@ -12,7 +13,7 @@ namespace Com.Ambassador.Service.Sales.Lib.PDFTemplates
 {
 	public class CostCalculationGarmentBudgetPdfTemplate
 	{
-		public MemoryStream GeneratePdfTemplate(CostCalculationGarmentViewModel viewModel, int timeoffset)
+		public MemoryStream GeneratePdfTemplate(CostCalculationGarmentViewModel viewModel, int timeoffset, List<GarmentCategoryViewModel> garmentCategoryViewModels)
 		{
 			BaseFont bf = BaseFont.CreateFont(BaseFont.HELVETICA, BaseFont.CP1250, BaseFont.NOT_EMBEDDED);
 			BaseFont bf_bold = BaseFont.CreateFont(BaseFont.HELVETICA_BOLD, BaseFont.CP1250, BaseFont.NOT_EMBEDDED);
@@ -352,10 +353,10 @@ namespace Com.Ambassador.Service.Sales.Lib.PDFTemplates
             #endregion
 
             #region Cost Calculation Material
-            PdfPTable table_ccm = new PdfPTable(11);
+            PdfPTable table_ccm = new PdfPTable(12);
 			table_ccm.TotalWidth = 570f;
 
-			float[] ccm_widths = new float[] { 1f, 3f, 2f, 6f, 3f, 3f, 2f, 2f, 3f, 3f, 2f };
+			float[] ccm_widths = new float[] { 1f, 3f, 2f, 2f, 6f, 3f, 3f, 2f, 2f, 3f, 3f, 2f };
 			table_ccm.SetWidths(ccm_widths);
 
 			PdfPCell cell_ccm = new PdfPCell() { Border = Rectangle.TOP_BORDER | Rectangle.LEFT_BORDER | Rectangle.BOTTOM_BORDER | Rectangle.RIGHT_BORDER, HorizontalAlignment = Element.ALIGN_CENTER, VerticalAlignment = Element.ALIGN_MIDDLE, Padding = 2 };
@@ -366,7 +367,9 @@ namespace Com.Ambassador.Service.Sales.Lib.PDFTemplates
 			table_ccm.AddCell(cell_ccm);
 			cell_ccm.Phrase = new Phrase("KODE", bold_font);
 			table_ccm.AddCell(cell_ccm);
-			cell_ccm.Phrase = new Phrase("DESCRIPTION", bold_font);
+            cell_ccm.Phrase = new Phrase("JENIS", bold_font);
+            table_ccm.AddCell(cell_ccm);
+            cell_ccm.Phrase = new Phrase("DESCRIPTION", bold_font);
 			table_ccm.AddCell(cell_ccm);
 			cell_ccm.Phrase = new Phrase("USAGE", bold_font);
 			table_ccm.AddCell(cell_ccm);
@@ -389,37 +392,56 @@ namespace Com.Ambassador.Service.Sales.Lib.PDFTemplates
 			float row2AllowedHeight = row2Y - printedOnHeight - margin;
 
 			for (int i = 0; i < viewModel.CostCalculationGarment_Materials.Count; i++)
-			{
-				//NO
-				cell_ccm.Phrase = new Phrase((i + 1).ToString(), normal_font);
+            {
+                var matchCategory = garmentCategoryViewModels.FirstOrDefault(x => x.Name == viewModel.CostCalculationGarment_Materials[i].Category.name);
+
+                viewModel.CostCalculationGarment_Materials[i].Category.CodeRequirement = matchCategory.CodeRequirement;
+            }
+
+            var MaterialBB = viewModel.CostCalculationGarment_Materials.Where(x => x.Category.CodeRequirement == "BB");
+            var MaterialBP = viewModel.CostCalculationGarment_Materials.Where(x => x.Category.CodeRequirement == "BP");
+            var MaterialBE = viewModel.CostCalculationGarment_Materials.Where(x => x.Category.CodeRequirement == "BE");
+            var MaterialOther = viewModel.CostCalculationGarment_Materials.Where(x => x.Category.CodeRequirement != "BB" && x.Category.CodeRequirement != "BP" && x.Category.CodeRequirement != "BE");
+
+            var orderedMaterial = MaterialBB.Concat(MaterialBP).Concat(MaterialBE).Concat(MaterialOther).ToList();
+
+            for (int i = 0; i < orderedMaterial.Count; i++)
+			{ 
+
+                //NO
+                cell_ccm.Phrase = new Phrase((i + 1).ToString(), normal_font);
 				table_ccm.AddCell(cell_ccm);
 
 				cell_ccm.HorizontalAlignment = Element.ALIGN_LEFT;
 
 				//CATEGORY
-				cell_ccm.Phrase = new Phrase(viewModel.CostCalculationGarment_Materials[i].Category.name, normal_font);
+				cell_ccm.Phrase = new Phrase(orderedMaterial[i].Category.name, normal_font);
 				table_ccm.AddCell(cell_ccm);
 
 				//KODE PRODUK
-				cell_ccm.Phrase = new Phrase(viewModel.CostCalculationGarment_Materials[i].Product.Code, normal_font);
+				cell_ccm.Phrase = new Phrase(orderedMaterial[i].Product.Code, normal_font);
 				table_ccm.AddCell(cell_ccm);
 
-				//DESCRIPTION
-				cell_ccm.Phrase = new Phrase(viewModel.CostCalculationGarment_Materials[i].Description + " - " + viewModel.CostCalculationGarment_Materials[i].ProductRemark, normal_font);
+                //BAGIAN GARMENT
+                cell_ccm.Phrase = new Phrase(orderedMaterial[i].Category.CodeRequirement, normal_font);
+                table_ccm.AddCell(cell_ccm);
+
+                //DESCRIPTION
+                cell_ccm.Phrase = new Phrase(orderedMaterial[i].Description + " - " + orderedMaterial[i].ProductRemark, normal_font);
 				table_ccm.AddCell(cell_ccm);
 
 				cell_ccm.HorizontalAlignment = Element.ALIGN_RIGHT;
 
-				double usage = viewModel.CostCalculationGarment_Materials[i].Quantity ?? 0;
-				cell_ccm.Phrase = new Phrase(Number.ToRupiahWithoutSymbol(usage) + "  " + (viewModel.CostCalculationGarment_Materials[i].UOMQuantity.Unit), normal_font);
+				double usage = orderedMaterial[i].Quantity ?? 0;
+				cell_ccm.Phrase = new Phrase(Number.ToRupiahWithoutSymbol(usage) + "  " + (orderedMaterial[i].UOMQuantity.Unit), normal_font);
 				table_ccm.AddCell(cell_ccm);
 
-				double price = viewModel.CostCalculationGarment_Materials[i].Price ?? 0;
-				cell_ccm.Phrase = new Phrase(String.Format("{0}/{1}", Number.ToRupiahWithoutSymbol(price), viewModel.CostCalculationGarment_Materials[i].UOMPrice.Unit), normal_font);
+				double price = orderedMaterial[i].Price ?? 0;
+				cell_ccm.Phrase = new Phrase(String.Format("{0}/{1}", Number.ToRupiahWithoutSymbol(price), orderedMaterial[i].UOMPrice.Unit), normal_font);
 				table_ccm.AddCell(cell_ccm);
 
 				double factor;
-				if (viewModel.CostCalculationGarment_Materials[i].Category.name == "FABRIC")
+				if (orderedMaterial[i].Category.name == "FABRIC")
 				{
 					factor = viewModel.FabricAllowance ?? 0;
 				}
@@ -429,35 +451,35 @@ namespace Com.Ambassador.Service.Sales.Lib.PDFTemplates
 				}
 				double totalQuantity = viewModel.Quantity ?? 0;
 				double quantity = (100 + factor) / 100 * usage * totalQuantity;
-                var budgetQuantity = Number.ToRupiahWithoutSymbol(Math.Ceiling(viewModel.CostCalculationGarment_Materials[i].BudgetQuantity));
+                var budgetQuantity = Number.ToRupiahWithoutSymbol(Math.Ceiling(orderedMaterial[i].BudgetQuantity));
                 cell_ccm.Phrase = new Phrase(budgetQuantity.Substring(0, budgetQuantity.Length - 3), normal_font);
 				table_ccm.AddCell(cell_ccm);
 
 				cell_ccm.HorizontalAlignment = Element.ALIGN_CENTER;
-				cell_ccm.Phrase = new Phrase(viewModel.CostCalculationGarment_Materials[i].UOMPrice.Unit, normal_font);
+				cell_ccm.Phrase = new Phrase(orderedMaterial[i].UOMPrice.Unit, normal_font);
 				table_ccm.AddCell(cell_ccm);
 
 				cell_ccm.HorizontalAlignment = Element.ALIGN_RIGHT;
 
-				if(viewModel.CostCalculationGarment_Materials[i].isFabricCM==true)
+				if(orderedMaterial[i].isFabricCM==true)
 				{
 					cell_ccm.Phrase = new Phrase(Number.ToRupiahWithoutSymbol(0), normal_font);
 					table_ccm.AddCell(cell_ccm);
 				}
 				else
 				{
-					double amount = viewModel.CostCalculationGarment_Materials[i].BudgetQuantity * price;
+					double amount = orderedMaterial[i].BudgetQuantity * price;
 					cell_ccm.Phrase = new Phrase(Number.ToRupiahWithoutSymbol(amount), normal_font);
 					table_ccm.AddCell(cell_ccm);
 				}
 				
 
 				cell_ccm.HorizontalAlignment = Element.ALIGN_CENTER;
-				cell_ccm.Phrase = new Phrase(viewModel.CostCalculationGarment_Materials[i].PO_SerialNumber, normal_font);
+				cell_ccm.Phrase = new Phrase(orderedMaterial[i].PO_SerialNumber, normal_font);
 				table_ccm.AddCell(cell_ccm);
 
 				cell_ccm.HorizontalAlignment = Element.ALIGN_RIGHT;
-                var beaKirim = Number.ToRupiahWithoutSymbol(Math.Ceiling(viewModel.CostCalculationGarment_Materials[i].TotalShippingFee * viewModel.Quantity.GetValueOrDefault()));
+                var beaKirim = Number.ToRupiahWithoutSymbol(Math.Ceiling(orderedMaterial[i].TotalShippingFee * viewModel.Quantity.GetValueOrDefault()));
                 cell_ccm.Phrase = new Phrase(beaKirim.Substring(0, beaKirim.Length - 3), normal_font);
 				table_ccm.AddCell(cell_ccm);
 
