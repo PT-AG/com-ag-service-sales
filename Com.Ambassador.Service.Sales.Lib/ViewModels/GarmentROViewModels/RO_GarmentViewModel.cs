@@ -22,6 +22,8 @@ namespace Com.Ambassador.Service.Sales.Lib.ViewModels.GarmentROViewModels
         public List<string> DocumentsPath { get; set; }
 
         public bool IsPosted { get; set; }
+        public bool IsRejected { get; set; }
+        public string RejectReason { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {

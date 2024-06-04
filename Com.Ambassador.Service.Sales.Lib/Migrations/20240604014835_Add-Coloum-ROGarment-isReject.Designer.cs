@@ -4,14 +4,16 @@ using Com.Ambassador.Service.Sales.Lib;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Com.Ambassador.Service.Sales.Lib.Migrations
 {
     [DbContext(typeof(SalesDbContext))]
-    partial class SalesDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240604014835_Add-Coloum-ROGarment-isReject")]
+    partial class AddColoumROGarmentisReject
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -250,6 +252,9 @@ namespace Com.Ambassador.Service.Sales.Lib.Migrations
 
                     b.Property<string>("BuyerName")
                         .HasMaxLength(255);
+
+                    b.Property<string>("CCType")
+                        .HasMaxLength(20);
 
                     b.Property<string>("Code")
                         .HasMaxLength(50);

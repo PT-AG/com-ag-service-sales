@@ -283,7 +283,7 @@ namespace Com.Ambassador.Sales.Test.PDFTemplates
                 },
                 CreatedBy = "fetih han"
             };
-            var result = pdf.GeneratePdfTemplate(viewModel, 2);
+            var result = pdf.GeneratePdfTemplate(viewModel, 2, new List<Service.Sales.Lib.ViewModels.IntegrationViewModel.GarmentCategoryViewModel>());
             Assert.NotNull(result);
             Assert.IsType<MemoryStream>(result);
 

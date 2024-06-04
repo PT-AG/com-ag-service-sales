@@ -38,38 +38,39 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Logic.ROGarmentLogics
 
             List<string> SelectedFields = new List<string>()
             {
-                  "Id", "Code", "CostCalculationGarment", "Total", "IsPosted"
+                  "Id", "Code", "CostCalculationGarment", "Total", "IsPosted","IsRejected"
             };
 
-            Query = Query.Join(DbContext.CostCalculationGarments, ro=>ro.CostCalculationGarmentId, ccg=>ccg.Id, (ro,ccg)=>
+            Query = Query.Join(DbContext.CostCalculationGarments, ro => ro.CostCalculationGarmentId, ccg => ccg.Id, (ro, ccg) =>
              new RO_Garment
+             {
+                 Id = ro.Id,
+                 Code = ro.Code,
+                 CostCalculationGarment = new CostCalculationGarment()
                  {
-                     Id = ro.Id,
-                     Code = ro.Code,
-                     CostCalculationGarment = new CostCalculationGarment()
-                     {
-                         Id = ccg.Id,
-                         Code = ccg.Code,
-                         RO_Number = ccg.RO_Number,
-                         Article = ccg.Article,
-                         BuyerCode = ccg.BuyerCode,
-                         BuyerName = ccg.BuyerName,
-                         BuyerBrandCode = ccg.BuyerBrandCode,
-                         BuyerBrandName = ccg.BuyerBrandName,
-                         ValidationMDDate = ccg.ValidationMDDate,
-                         ValidationSampleDate = ccg.ValidationSampleDate,
-                         UnitCode = ccg.UnitCode,
-                         UnitName = ccg.UnitName,
-                         Quantity = ccg.Quantity,
-                         UOMUnit = ccg.UOMUnit,
-                         IsValidatedROPPIC = ccg.IsValidatedROPPIC,
-                         IsValidatedROSample = ccg.IsValidatedROSample,
-                         IsValidatedROMD = ccg.IsValidatedROMD
-                     },
-                     Total = ro.Total,
-                     IsPosted = ro.IsPosted,
-                     LastModifiedUtc = ro.LastModifiedUtc
-                 });
+                     Id = ccg.Id,
+                     Code = ccg.Code,
+                     RO_Number = ccg.RO_Number,
+                     Article = ccg.Article,
+                     BuyerCode = ccg.BuyerCode,
+                     BuyerName = ccg.BuyerName,
+                     BuyerBrandCode = ccg.BuyerBrandCode,
+                     BuyerBrandName = ccg.BuyerBrandName,
+                     ValidationMDDate = ccg.ValidationMDDate,
+                     ValidationSampleDate = ccg.ValidationSampleDate,
+                     UnitCode = ccg.UnitCode,
+                     UnitName = ccg.UnitName,
+                     Quantity = ccg.Quantity,
+                     UOMUnit = ccg.UOMUnit,
+                     IsValidatedROPPIC = ccg.IsValidatedROPPIC,
+                     IsValidatedROSample = ccg.IsValidatedROSample,
+                     IsValidatedROMD = ccg.IsValidatedROMD,
+                 },
+                 Total = ro.Total,
+                 IsPosted = ro.IsPosted,
+                 LastModifiedUtc = ro.LastModifiedUtc,
+                 IsRejected = ro.IsRejected
+             });
 
             //List<string> SearchAttributes = new List<string>()
             //{
