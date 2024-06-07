@@ -133,5 +133,24 @@ namespace Com.Ambassador.Service.Sales.WebApi.Controllers
                 return StatusCode(Common.INTERNAL_ERROR_STATUS_CODE, Result);
             }
         }
+
+        [HttpPut("reject-sample/{id}")]
+        public async Task<IActionResult> RejectSample(int id, [FromBody] RO_GarmentViewModel viewModel)
+        {
+            try
+            {
+                ValidateUser();
+
+                await Facade.RejectSample(id, viewModel);
+                return NoContent();
+            }
+            catch (Exception e)
+            {
+                Dictionary<string, object> Result =
+                    new ResultFormatter(ApiVersion, Common.INTERNAL_ERROR_STATUS_CODE, e.Message)
+                    .Fail();
+                return StatusCode(Common.INTERNAL_ERROR_STATUS_CODE, Result);
+            }
+        }
     }
 }

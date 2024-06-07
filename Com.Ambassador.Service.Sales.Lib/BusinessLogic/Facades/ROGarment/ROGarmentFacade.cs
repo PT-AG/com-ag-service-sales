@@ -7,6 +7,8 @@ using Com.Ambassador.Service.Sales.Lib.Models.CostCalculationGarments;
 using Com.Ambassador.Service.Sales.Lib.Models.ROGarments;
 using Com.Ambassador.Service.Sales.Lib.Services;
 using Com.Ambassador.Service.Sales.Lib.Utilities;
+using Com.Ambassador.Service.Sales.Lib.ViewModels.GarmentROViewModels;
+using Com.Moonlay.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -21,16 +23,15 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Facades.ROGarment
     {
         private readonly SalesDbContext DbContext;
         private readonly DbSet<RO_Garment> DbSet;
-        private readonly IdentityService identityService;
         private readonly ROGarmentLogic roGarmentLogic;
         private readonly ICostCalculationGarment costCalGarmentLogic;
         public IServiceProvider ServiceProvider;
-
-        public ROGarmentFacade(IServiceProvider serviceProvider, SalesDbContext dbContext)
+        protected IIdentityService IIdentityService;
+        public ROGarmentFacade(IServiceProvider serviceProvider, SalesDbContext dbContex)
         {
-            DbContext = dbContext;
+            DbContext = dbContex;
             DbSet = DbContext.Set<RO_Garment>();
-            identityService = serviceProvider.GetService<IdentityService>();
+            IIdentityService = serviceProvider.GetService<IIdentityService>();
             roGarmentLogic = serviceProvider.GetService<ROGarmentLogic>();
             costCalGarmentLogic = serviceProvider.GetService<ICostCalculationGarment>();
             ServiceProvider = serviceProvider;
@@ -262,6 +263,41 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Facades.ROGarment
                 try
                 {
                     roGarmentLogic.UnpostRO(id);
+                    Updated = await DbContext.SaveChangesAsync();
+                    transaction.Commit();
+                }
+                catch (Exception e)
+                {
+                    transaction.Rollback();
+                    throw e;
+                }
+            }
+            return Updated;
+        }
+
+        public async Task<int> RejectSample(int id, RO_GarmentViewModel viewModel)
+        {
+            int Updated = 0;
+            using (var transaction = DbContext.Database.BeginTransaction())
+            {
+                try
+                {
+                    //Update RO Garment
+                    RO_Garment ROGarment = await ReadByIdAsync(id);
+
+                    ROGarment.IsRejected = true;
+                    ROGarment.RejectReason = viewModel.RejectReason;
+                    ROGarment.IsPosted = false;
+                    EntityExtension.FlagForUpdate(ROGarment, IIdentityService.Username, "sales-service");
+
+                    //Update CC
+                    CostCalculationGarment costCalculationGarment = await costCalGarmentLogic.ReadByIdAsync((int)ROGarment.CostCalculationGarmentId);
+                    costCalculationGarment.IsValidatedROMD = false;
+                    costCalculationGarment.ValidationMDBy = null;
+                    costCalculationGarment.ValidationMDDate = DateTimeOffset.MinValue;
+
+                    EntityExtension.FlagForUpdate(costCalculationGarment, IIdentityService.Username, "sales-service");
+
                     Updated = await DbContext.SaveChangesAsync();
                     transaction.Commit();
                 }
