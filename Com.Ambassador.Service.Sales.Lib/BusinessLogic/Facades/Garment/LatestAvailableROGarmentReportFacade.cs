@@ -69,6 +69,8 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Facades.Garment
                 foreach (var d in data)
                 {
                     dataTable.Rows.Add(++i, d.RONo, d.ApprovedSampleDate.ToString("dd MMMM yyyy", new CultureInfo("id-ID")), d.DeliveryDate.ToString("dd MMMM yyyy", new CultureInfo("id-ID")), d.DateDiff, d.LeadTime, d.BuyerCode, d.Buyer, d.Type, d.Article, d.CommodityDescription, d.Quantity, d.Uom, d.Fabric, d.SizeRange);
+                    //dataTable.Rows.Add(++i, d.RONo, d.ApprovedSampleDate.ToString("dd MMMM yyyy", new CultureInfo("id-ID")), d.DeliveryDate.ToString("dd MMMM yyyy", new CultureInfo("id-ID")), 26, 30, d.BuyerCode, d.Buyer, d.Type, d.Article, d.CommodityDescription, d.Quantity, d.Uom, d.Fabric, d.SizeRange);
+
                 }
                 dataTable.Rows.Add(null, null, null, null, null, null, null, null, null, null, null);
                 dataTable.Rows.Add(null, null, null, null, null, null, null, null, null, null, null);
@@ -77,23 +79,23 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Facades.Garment
                 //LEAD 35
                 var Count35 = data.Count(d => d.LeadTime == 35);
                 var Count35Ok = data.Count(d => d.DateDiff >= 30 && d.LeadTime == 35);
-                var Percent35Ok = ((decimal)Count35Ok / Count35).ToString("P", new CultureInfo("id-ID"));
+                //var Percent35Ok = ((decimal)Count35Ok / Count35).ToString("P", new CultureInfo("id-ID"));
                 var Count35NotOk = data.Count(d => d.DateDiff < 30 && d.LeadTime == 35);
-                var Percent35NotOk = ((decimal)Count35NotOk / Count35).ToString("P", new CultureInfo("id-ID"));
+                //var Percent35NotOk = ((decimal)Count35NotOk / Count35).ToString("P", new CultureInfo("id-ID"));
 
                 //LEAD 30
                 var Count30 = data.Count(d => d.LeadTime == 30);
                 var Count30Ok = data.Count(d => d.DateDiff >= 25 && d.LeadTime == 30);
-                var Percent30Ok = ((decimal)Count30Ok / Count30).ToString("P", new CultureInfo("id-ID"));
+                //var Percent30Ok = ((decimal)Count30Ok / Count30).ToString("P", new CultureInfo("id-ID"));
                 var Count30NotOk = data.Count(d => d.DateDiff < 25 && d.LeadTime == 30);
-                var Percent30NotOk = ((decimal)Count30NotOk / Count30).ToString("P", new CultureInfo("id-ID"));
+                //var Percent30NotOk = ((decimal)Count30NotOk / Count30).ToString("P", new CultureInfo("id-ID"));
 
                 //LEAD 25
                 var Count25 = data.Count(d => d.LeadTime == 25);
                 var Count25Ok = data.Count(d => d.DateDiff >= 20 && d.LeadTime == 25);
-                var Percent25Ok = ((decimal)Count25Ok / Count25).ToString("P", new CultureInfo("id-ID"));
+                //var Percent25Ok = ((decimal)Count25Ok / Count25).ToString("P", new CultureInfo("id-ID"));
                 var Count25NotOk = data.Count(d => d.DateDiff < 20 && d.LeadTime == 25);
-                var Percent25NotOk = ((decimal)Count25NotOk / Count25).ToString("P", new CultureInfo("id-ID"));
+                //var Percent25NotOk = ((decimal)Count25NotOk / Count25).ToString("P", new CultureInfo("id-ID"));
 
                 var Count = Count25 + Count30 + Count35;
                 var CountOk = Count35Ok + Count30Ok + Count25Ok;
@@ -106,6 +108,8 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Facades.Garment
                 dataTable.Rows.Add(null, "Persentase Status OK", null, $"{CountOk}/{Count} X 100% = {PercentOk}", null, null, null, null, null, null, null);
                 dataTable.Rows.Add(null, "Status NOT OK", null, "Selisih Tgl Penerimaan RO dengan Tgl Shipment <  " + leadTime + "  hari", null, null, null, null, null, null, null);
                 dataTable.Rows.Add(null, "Persentase Status NOT OK", null, $"{CountNotOk}/{Count} X 100% = {PercentNotOk}", null, null, null, null, null, null, null);
+                //sampai sini ------------------------------------------
+
 
                 //dataTable.Rows.Add(null, null, null, null, null, null, null, null, null, null, null);
                 //dataTable.Rows.Add(null, null, null, null, null, null, null, null, null, null, null);
