@@ -136,7 +136,7 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Logic.Garment
             return GarmentPurchaseRequestItems;
         }
 
-        private GarmentPurchaseRequestViewModel FillGarmentPurchaseRequest(CostCalculationGarment costCalculation, Dictionary<long, string> productDicts)
+        public GarmentPurchaseRequestViewModel FillGarmentPurchaseRequest(CostCalculationGarment costCalculation, Dictionary<long, string> productDicts)
         {
             GarmentPurchaseRequestViewModel garmentPurchaseRequest = new GarmentPurchaseRequestViewModel
             {

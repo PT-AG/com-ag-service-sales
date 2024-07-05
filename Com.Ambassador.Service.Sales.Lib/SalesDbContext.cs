@@ -89,6 +89,8 @@ namespace Com.Ambassador.Service.Sales.Lib
 
         public DbSet<DeliveryNoteProductionModel> DeliveryNoteProduction { get; set; }
 
+        public DbSet<LogHistory> LogHistories { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

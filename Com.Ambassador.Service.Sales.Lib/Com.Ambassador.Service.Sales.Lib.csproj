@@ -79,6 +79,8 @@
     <Compile Remove="Migrations\20200529070201_NewMigrationFix.Designer.cs" />
     <Compile Remove="Migrations\20200602131205_ChangeModelDOReturnItems.cs" />
     <Compile Remove="Migrations\20200602131205_ChangeModelDOReturnItems.Designer.cs" />
+    <Compile Remove="Migrations\20240909083009_add-table-logHistory.cs" />
+    <Compile Remove="Migrations\20240909083009_add-table-logHistory.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

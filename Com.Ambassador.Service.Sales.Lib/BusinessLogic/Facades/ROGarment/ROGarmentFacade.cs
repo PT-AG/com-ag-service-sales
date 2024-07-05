@@ -1,6 +1,7 @@
 ﻿using Com.Ambassador.Service.Sales.Lib.BusinessLogic.Interface;
 using Com.Ambassador.Service.Sales.Lib.BusinessLogic.Interface.CostCalculationGarmentLogic;
 using Com.Ambassador.Service.Sales.Lib.BusinessLogic.Interface.ROGarmentInterface;
+using Com.Ambassador.Service.Sales.Lib.BusinessLogic.Logic;
 using Com.Ambassador.Service.Sales.Lib.BusinessLogic.Logic.ROGarmentLogics;
 using Com.Ambassador.Service.Sales.Lib.Helpers;
 using Com.Ambassador.Service.Sales.Lib.Models.CostCalculationGarments;
@@ -27,6 +28,8 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Facades.ROGarment
         private readonly ICostCalculationGarment costCalGarmentLogic;
         public IServiceProvider ServiceProvider;
         protected IIdentityService IIdentityService;
+
+        private readonly LogHistoryLogic logHistoryLogic;
         public ROGarmentFacade(IServiceProvider serviceProvider, SalesDbContext dbContex)
         {
             DbContext = dbContex;
@@ -35,6 +38,8 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Facades.ROGarment
             roGarmentLogic = serviceProvider.GetService<ROGarmentLogic>();
             costCalGarmentLogic = serviceProvider.GetService<ICostCalculationGarment>();
             ServiceProvider = serviceProvider;
+
+            logHistoryLogic = serviceProvider.GetService<LogHistoryLogic>();
         }
         private IAzureImageFacade AzureImageFacade
         {
@@ -163,6 +168,11 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Facades.ROGarment
         public ReadResponse<RO_Garment> Read(int page, int size, string order, List<string> select, string keyword, string filter)
         {
             return roGarmentLogic.Read(page, size, order, select, keyword, filter);
+        }
+
+        public List<RO_ComponentAppsViewModel> RoWithComponent(int page, int size, string order, List<string> select, string keyword, string filter)
+        {
+            return roGarmentLogic.RoWithComponent(page, size, order, select, keyword, filter);
         }
 
         public async Task<RO_Garment> ReadByIdAsync(int id)
@@ -297,6 +307,9 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Facades.ROGarment
                     costCalculationGarment.ValidationMDDate = DateTimeOffset.MinValue;
 
                     EntityExtension.FlagForUpdate(costCalculationGarment, IIdentityService.Username, "sales-service");
+
+                    //Create Log History
+                    logHistoryLogic.Create("PENJUALAN", "Reject RO Garment - " + costCalculationGarment.RO_Number, viewModel.RejectReason);
 
                     Updated = await DbContext.SaveChangesAsync();
                     transaction.Commit();
