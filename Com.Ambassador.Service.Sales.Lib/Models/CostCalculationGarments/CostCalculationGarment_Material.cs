@@ -42,7 +42,7 @@ namespace Com.Ambassador.Service.Sales.Lib.Models.CostCalculationGarments
         public string Yarn { set; get; }
         [MaxLength(255)]
         public string Width { set; get; }
-        [MaxLength(255)]
+        [MaxLength(500)]
         public string Description { get; set; }
         [MaxLength(3000)]
         public string ProductRemark { get; set; }
