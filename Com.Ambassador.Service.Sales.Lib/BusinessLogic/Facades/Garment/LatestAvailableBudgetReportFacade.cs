@@ -65,24 +65,24 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Facades.Garment
                 //LEAD 35
                 var Count35 = data.Count(d => d.LeadTime == 35);
                 var Count35Ok = data.Count(d => d.DateDiff >= 35 && d.LeadTime == 35);
-                var Percent35Ok = ((decimal)Count35Ok / Count35).ToString("P", new CultureInfo("id-ID"));
+                //var Percent35Ok = ((decimal)Count35Ok / Count35).ToString("P", new CultureInfo("id-ID"));
                 var Count35NotOk = data.Count(d => d.DateDiff < 35 && d.LeadTime == 35);
-                var Percent35NotOk = ((decimal)Count35NotOk / Count35).ToString("P", new CultureInfo("id-ID"));
+                //var Percent35NotOk = ((decimal)Count35NotOk / Count35).ToString("P", new CultureInfo("id-ID"));
 
 
                 //LEAD 30
                 var Count30 = data.Count(d => d.LeadTime == 30);
                 var Count30Ok = data.Count(d => d.DateDiff >= 30 && d.LeadTime == 30);
-                var Percent30Ok = ((decimal)Count30Ok / Count30).ToString("P", new CultureInfo("id-ID"));
+                //var Percent30Ok = ((decimal)Count30Ok / Count30).ToString("P", new CultureInfo("id-ID"));
                 var Count30NotOk = data.Count(d => d.DateDiff < 30 && d.LeadTime == 30);
-                var Percent30NotOk = ((decimal)Count30NotOk / Count30).ToString("P", new CultureInfo("id-ID"));
+                //var Percent30NotOk = ((decimal)Count30NotOk / Count30).ToString("P", new CultureInfo("id-ID"));
 
                 //LEAD 25
                 var Count25 = data.Count(d => d.LeadTime == 25);
                 var Count25Ok = data.Count(d => d.DateDiff >= 25 && d.LeadTime == 25);
-                var Percent25Ok = ((decimal)Count25Ok / Count25).ToString("P", new CultureInfo("id-ID"));
+                //var Percent25Ok = ((decimal)Count25Ok / Count25).ToString("P", new CultureInfo("id-ID"));
                 var Count25NotOk = data.Count(d => d.DateDiff < 25 && d.LeadTime == 25);
-                var Percent25NotOk = ((decimal)Count25NotOk / Count25).ToString("P", new CultureInfo("id-ID"));
+                //var Percent25NotOk = ((decimal)Count25NotOk / Count25).ToString("P", new CultureInfo("id-ID"));
 
                 var Count = Count25 + Count30 + Count35;
                 var CountOk = Count35Ok + Count30Ok + Count25Ok;
