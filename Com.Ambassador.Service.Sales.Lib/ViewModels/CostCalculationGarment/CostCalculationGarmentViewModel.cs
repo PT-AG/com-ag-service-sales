@@ -98,6 +98,8 @@ namespace Com.Ambassador.Service.Sales.Lib.ViewModels.CostCalculationGarment
         public string RODistributionBy { get; set; }
 
         public bool IsPosted { get; set; }
+        public string CCType { get; set; }
+        public string SubconType { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
