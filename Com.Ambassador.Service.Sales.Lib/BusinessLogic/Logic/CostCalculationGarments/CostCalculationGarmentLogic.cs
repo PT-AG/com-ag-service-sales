@@ -38,7 +38,7 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Logic.CostCalculationGa
 		public override ReadResponse<CostCalculationGarment> Read(int page, int size, string order, List<string> select, string keyword, string filter)
 		{
 			IQueryable<CostCalculationGarment> Query = DbSet;
-
+            var a = Query.Where(x => x.RO_Number == "AG2420007");
 			List<string> SearchAttributes = new List<string>()
 			{
                 "PreSCNo", "RO_Number","Article","UnitName"
