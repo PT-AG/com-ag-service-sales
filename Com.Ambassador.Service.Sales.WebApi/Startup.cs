@@ -252,7 +252,8 @@ namespace Com.Ambassador.Service.Sales.WebApi
                 .AddTransient<ShinProductionOrderLogic>()
                 .AddTransient<DOAvalLogic>()
                 .AddTransient<DOStockLogic>()
-                .AddTransient<DeliveryNoteProductionLogic>();
+                .AddTransient<DeliveryNoteProductionLogic>()
+                .AddTransient<LogHistoryLogic>() ;
         }
 
         private void RegisterServices(IServiceCollection services)
@@ -285,11 +286,14 @@ namespace Com.Ambassador.Service.Sales.WebApi
         {
             string connectionString = Configuration.GetConnectionString("DefaultConnection") ?? Configuration["DefaultConnection"];
             string connectionStringLocalMerchandiser = Configuration.GetConnectionString("LocalMerchandiserConnection") ?? Configuration["LocalMerchandiserConnection"];
+            string connectionStringPurchasing = Configuration.GetConnectionString("PurchasingConnection") ?? Configuration["PurchasingConnection"];
 
             Com.Ambassador.Service.Sales.Lib.Helpers.APIEndpoint.ConnectionString = connectionString;
             /* Register */
             services.AddDbContext<SalesDbContext>(options => options.UseSqlServer(connectionString));
             services.AddTransient<ILocalMerchandiserDbContext>(s => new LocalMerchandiserDbContext(connectionStringLocalMerchandiser));
+            services.AddDbContext<PurchasingDbContext>(options => SqlServerDbContextOptionsExtensions.UseSqlServer(options, connectionStringPurchasing));
+
             RegisterFacades(services);
             RegisterLogic(services);
             RegisterServices(services);

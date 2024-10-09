@@ -6,14 +6,18 @@ using Com.Ambassador.Service.Sales.Lib.Services;
 using Com.Ambassador.Service.Sales.Lib.Utilities;
 using Com.Ambassador.Service.Sales.Lib.Utilities.BaseClass;
 using Com.Ambassador.Service.Sales.Lib.ViewModels.CostCalculationGarment;
+using Com.Ambassador.Service.Sales.Lib.ViewModels.CostCalculationGarment.Cancel_Approval;
 using Com.Moonlay.Models;
 using Com.Moonlay.NetCore.Lib;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.IO;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Net;
@@ -28,12 +32,18 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Logic.CostCalculationGa
 	{ 
 		private CostCalculationGarmentMaterialLogic costCalculationGarmentMaterialLogic;
 
-		private readonly SalesDbContext DbContext; 
-		public CostCalculationGarmentLogic(CostCalculationGarmentMaterialLogic costCalculationGarmentMaterialLogic, IServiceProvider serviceProvider, IIdentityService identityService, SalesDbContext dbContext) : base(identityService, serviceProvider, dbContext)
+		private readonly SalesDbContext DbContext;
+        private readonly PurchasingDbContext PurchasingDbContext;
+
+        private readonly LogHistoryLogic logHistoryLogic;
+        public CostCalculationGarmentLogic(CostCalculationGarmentMaterialLogic costCalculationGarmentMaterialLogic, IServiceProvider serviceProvider, IIdentityService identityService, SalesDbContext dbContext) : base(identityService, serviceProvider, dbContext)
 		{
 			this.costCalculationGarmentMaterialLogic = costCalculationGarmentMaterialLogic;
-			this.DbContext = dbContext; 
-		}
+			this.DbContext = dbContext;
+            this.PurchasingDbContext = serviceProvider.GetService<PurchasingDbContext>();
+          
+            logHistoryLogic = serviceProvider.GetService<LogHistoryLogic>();
+        }
 
 		public override ReadResponse<CostCalculationGarment> Read(int page, int size, string order, List<string> select, string keyword, string filter)
 		{
@@ -643,5 +653,304 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Logic.CostCalculationGa
         {
             return DbSet.FirstOrDefaultAsync(d => d.RO_Number.Equals(ro) && d.IsDeleted.Equals(false));
         }
+
+        #region Cancel Approval
+        public ReadResponse<CostCalculationGarment> ReadForCancelApproval(int page, int size, string order, List<string> select, string keyword, string filter)
+        {
+
+            //add query left join with GarmentPurchaseRequest from purchasing dbcontext
+
+            var prs = PurchasingDbContext.GarmentPurchaseRequests.Where(w => w.IsDeleted == false && w.IsUsed == false && w.PRType == "JOB ORDER").Select(s => s.RONo).ToHashSet();
+            var Query = from a in DbSet
+                        join b in prs on a.RO_Number equals b into gpr
+                        from gprs in gpr.DefaultIfEmpty()
+                        where a.IsApprovedIE == true && a.IsApprovedPurchasing == true/* && (gprs == null || gprs.IsUsed == false && gprs.IsDeleted == false)*/
+                        select a;
+
+            List<string> SearchAttributes = new List<string>()
+            {
+                "PreSCNo", "RO_Number","Article","UnitName"
+            };
+
+            Query = QueryHelper<CostCalculationGarment>.Search(Query, SearchAttributes, keyword);
+
+            Dictionary<string, object> FilterDictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(filter);
+
+            Query = QueryHelper<CostCalculationGarment>.Filter(Query, FilterDictionary);
+
+            Query = Query
+                 .Select(ccg => new CostCalculationGarment
+                 {
+                     Id = ccg.Id,
+                     Code = ccg.Code,
+                     RO_Number = ccg.RO_Number,
+                     Article = ccg.Article,
+                     UnitId = ccg.UnitId,
+                     UnitCode = ccg.UnitCode,
+                     UnitName = ccg.UnitName,
+                     Quantity = ccg.Quantity,
+                     ConfirmPrice = ccg.ConfirmPrice,
+                     BuyerCode = ccg.BuyerCode,
+                     BuyerId = ccg.BuyerId,
+                     BuyerName = ccg.BuyerName,
+                     BuyerBrandCode = ccg.BuyerBrandCode,
+                     BuyerBrandId = ccg.BuyerBrandId,
+                     BuyerBrandName = ccg.BuyerBrandName,
+                     Commodity = ccg.Commodity,
+                     ComodityCode = ccg.ComodityCode,
+                     CommodityDescription = ccg.CommodityDescription,
+                     ComodityID = ccg.ComodityID,
+                     DeliveryDate = ccg.DeliveryDate,
+                     UOMCode = ccg.UOMCode,
+                     UOMID = ccg.UOMID,
+                     UOMUnit = ccg.UOMUnit,
+
+                     PreSCNo = ccg.PreSCNo,
+
+                     IsApprovedMD = ccg.IsApprovedMD,
+                     IsApprovedPurchasing = ccg.IsApprovedPurchasing,
+                     IsApprovedIE = ccg.IsApprovedIE,
+                     IsApprovedKadivMD = ccg.IsApprovedKadivMD,
+                     IsApprovedPPIC = ccg.IsApprovedPPIC,
+
+                     IsPosted = ccg.IsPosted,
+
+                     LastModifiedUtc = ccg.LastModifiedUtc,
+                     SectionName = ccg.SectionName,
+                     Section = ccg.Section,
+                     CreatedBy = ccg.CreatedBy
+                 });
+
+            Dictionary<string, string> OrderDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(order);
+            Query = QueryHelper<CostCalculationGarment>.Order(Query, OrderDictionary);
+
+            Pageable<CostCalculationGarment> pageable = new Pageable<CostCalculationGarment>(Query, page - 1, size);
+            List<CostCalculationGarment> data = pageable.Data.ToList<CostCalculationGarment>();
+            int totalData = pageable.TotalCount;
+
+            return new ReadResponse<CostCalculationGarment>(data, totalData, OrderDictionary, new List<string>());
+        }
+
+        public async Task<int> CancelApproval(long id, string deletedRemark)
+        {
+            int Updated = 0;
+            using (var dbContext1 = DbContext)
+            {
+                using (var transaction = dbContext1.Database.BeginTransaction())
+                {
+                    using (var dbContext2 = PurchasingDbContext)
+                    {
+                        using (var transaction2 = dbContext2.Database.BeginTransaction())
+                        {
+                            try
+                            {
+                                var data = await DbSet.Include(s => s.CostCalculationGarment_Materials).FirstOrDefaultAsync(d => d.Id == id);
+
+                                //update CostCalculationGarment approved
+                                if (data != null)
+                                {
+                                    //update approved to false
+                                    data.IsApprovedIE = false;
+                                    data.IsApprovedPurchasing = false;
+                                    data.IsApprovedMD = false;
+                                    data.IsApprovedKadivMD = false;
+                                    data.IsApprovedPPIC = false;
+
+                                    //update appovedDate to null
+                                    data.ApprovedIEDate = DateTimeOffset.MinValue;
+                                    data.ApprovedPurchasingDate = DateTimeOffset.MinValue;
+                                    data.ApprovedMDDate = DateTimeOffset.MinValue;
+                                    data.ApprovedKadivMDDate = DateTimeOffset.MinValue;
+                                    data.ApprovedPPICDate = DateTimeOffset.MinValue;
+
+                                    //update approvedBy to null
+                                    data.ApprovedIEBy = null;
+                                    data.ApprovedPurchasingBy = null;
+                                    data.ApprovedMDBy = null;
+                                    data.ApprovedKadivMDBy = null;
+                                    data.ApprovedPPICBy = null;
+
+                                    data.IsPosted = false;
+
+                                    EntityExtension.FlagForUpdate(data, IdentityService.Username, "sales-service");
+
+                                    foreach (var item in data.CostCalculationGarment_Materials)
+                                    {
+                                        item.IsPRMaster = false;
+                                        item.IsPosted = false;
+                                        EntityExtension.FlagForUpdate(item, IdentityService.Username, "sales-service");
+                                    }
+
+                                    DbSet.Update(data);
+
+                                    //Create Log History
+                                    logHistoryLogic.Create("PENJUALAN", "Cancel Approve Cost Calculation - " + data.RO_Number, deletedRemark);
+
+                                    Updated = await DbContext.SaveChangesAsync();
+                                }
+
+                                //update GarmentPurchaseRequest
+                                var garmentPurchaseRequest = PurchasingDbContext.GarmentPurchaseRequests.Include(s => s.Items).FirstOrDefault(f => f.RONo == data.RO_Number && f.IsDeleted == false);
+
+                                if (garmentPurchaseRequest != null)
+                                {
+                                    EntityExtension.FlagForDelete(garmentPurchaseRequest, IdentityService.Username, "sales-service");
+
+                                    foreach (var item in garmentPurchaseRequest.Items)
+                                    {
+                                        EntityExtension.FlagForDelete(item, IdentityService.Username, "sales-service");
+                                    }
+
+                                    PurchasingDbContext.GarmentPurchaseRequests.Update(garmentPurchaseRequest);
+                                    Updated += await PurchasingDbContext.SaveChangesAsync();
+                                }
+
+                                transaction.Commit();
+                                transaction2.Commit();
+                            }
+                            catch (Exception e)
+                            {
+                                // Rollback both transactions if any operation fails
+                                transaction.Rollback();
+                                transaction2.Rollback();
+                                throw new Exception(e.Message);
+                            }
+
+
+                        }
+                    }
+                }
+            }
+            return Updated;
+        }
+
+        public Tuple<List<CancelApprovalCostCalculationReportViewModel>, int> ReadCancelApproval(DateTime? dateFrom, DateTime? dateTo, int page, int size, int offset)
+        {
+            var Query = GetReportQueryCancelApproval(dateFrom, dateTo, offset);
+
+            var Data = Query.OrderByDescending(b => b.CancelDate).ToList();
+
+            Pageable<CancelApprovalCostCalculationReportViewModel> pageable = new Pageable<CancelApprovalCostCalculationReportViewModel>(Data, page - 1, size);
+            List<CancelApprovalCostCalculationReportViewModel> Data_ = pageable.Data.ToList<CancelApprovalCostCalculationReportViewModel>();
+
+            int TotalData = pageable.TotalCount;
+
+            return Tuple.Create(Data_, TotalData);
+        }
+
+        private IQueryable<CancelApprovalCostCalculationReportViewModel> GetReportQueryCancelApproval(DateTime? dateFrom, DateTime? dateTo, int offset)
+        {
+            //get data log history where remark is not null and activity start with Cancel
+            var dataLogHistory = DbContext.LogHistories.Where(x =>
+                    x.Remark != null && x.Activity.StartsWith("Cancel") &&
+                    x.CreatedDate.AddHours(offset).Date >= dateFrom.Value.Date && x.CreatedDate.AddHours(offset).Date <= dateTo.Value.Date);
+
+            //mapping data to cancel approval cost calculation report view model
+            var result = dataLogHistory.Select(x => new CancelApprovalCostCalculationReportViewModel
+            {
+                Activity = x.Activity,
+                CancelDate = x.CreatedDate.AddHours(offset),
+                CancelBy = x.CreatedBy,
+                CancelReason = x.Remark,
+                RequestedBy = DbSet.First(s => s.RO_Number == x.Activity.Substring(x.Activity.Length - 9)).CreatedBy
+            });
+
+            return result;
+        }
+
+        public MemoryStream GenerateExcelCancelApproval(DateTime? dateFrom, DateTime? dateTo, int offset)
+        {
+            var Query = GetReportQueryCancelApproval(dateFrom, dateTo, offset);
+            Query = Query.OrderByDescending(b => b.CancelDate);
+
+            DataTable result = new DataTable();
+
+            result.Columns.Add(new DataColumn() { ColumnName = "No", DataType = typeof(string) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Aktifitas", DataType = typeof(string) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Tanggal Cancel", DataType = typeof(string) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Dibatalkan Oleh", DataType = typeof(string) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Yang Meminta", DataType = typeof(string) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Alasan Pembatalan", DataType = typeof(string) });
+
+            if (Query.ToArray().Count() == 0)
+                result.Rows.Add("", "", "", "", "");
+            else
+            {
+                int index = 1;
+                foreach (var d in Query)
+                {
+                    result.Rows.Add(index, d.Activity, d.CancelDate.ToString("dd MMM yyyy"), d.CancelBy, d.RequestedBy, d.CancelReason);
+                    index++;
+                }
+            }
+
+            return Excel.CreateExcel(new List<KeyValuePair<DataTable, string>>() { new KeyValuePair<DataTable, string>(result, "Cancel Approval Cost Calculation") }, true);
+        }
+
+        #region Report Reject RO
+        public Tuple<List<CancelApprovalCostCalculationReportViewModel>, int> ReadRejectRO(DateTime? dateFrom, DateTime? dateTo, int page, int size, int offset)
+        {
+            var Query = GetReportQueryReadRejectRO(dateFrom, dateTo, offset);
+
+            var Data = Query.OrderByDescending(b => b.CancelDate).ToList();
+
+            Pageable<CancelApprovalCostCalculationReportViewModel> pageable = new Pageable<CancelApprovalCostCalculationReportViewModel>(Data, page - 1, size);
+            List<CancelApprovalCostCalculationReportViewModel> Data_ = pageable.Data.ToList<CancelApprovalCostCalculationReportViewModel>();
+
+            int TotalData = pageable.TotalCount;
+
+            return Tuple.Create(Data_, TotalData);
+        }
+
+        private IQueryable<CancelApprovalCostCalculationReportViewModel> GetReportQueryReadRejectRO(DateTime? dateFrom, DateTime? dateTo, int offset)
+        {
+            //get data log history where remark is not null and activity start with Cancel
+            var dataLogHistory = DbContext.LogHistories.Where(x =>
+                    x.Remark != null && x.Activity.StartsWith("Reject") &&
+                    x.CreatedDate.AddHours(offset).Date >= dateFrom.Value.Date && x.CreatedDate.AddHours(offset).Date <= dateTo.Value.Date);
+
+            //mapping data to cancel approval cost calculation report view model
+            var result = dataLogHistory.Select(x => new CancelApprovalCostCalculationReportViewModel
+            {
+                Activity = x.Activity,
+                CancelDate = x.CreatedDate.AddHours(offset),
+                CancelBy = x.CreatedBy,
+                CancelReason = x.Remark,
+                RequestedBy = DbSet.First(s => s.RO_Number == x.Activity.Substring(x.Activity.Length - 9)).CreatedBy
+            });
+
+            return result;
+        }
+
+        public MemoryStream GenerateExcelReadRejectRO(DateTime? dateFrom, DateTime? dateTo, int offset)
+        {
+            var Query = GetReportQueryReadRejectRO(dateFrom, dateTo, offset);
+            Query = Query.OrderByDescending(b => b.CancelDate);
+
+            DataTable result = new DataTable();
+
+            result.Columns.Add(new DataColumn() { ColumnName = "No", DataType = typeof(string) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Aktifitas", DataType = typeof(string) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Tanggal Cancel", DataType = typeof(string) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Dibatalkan Oleh", DataType = typeof(string) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Yang Meminta", DataType = typeof(string) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Alasan Pembatalan", DataType = typeof(string) });
+
+            if (Query.ToArray().Count() == 0)
+                result.Rows.Add("", "", "", "", "");
+            else
+            {
+                int index = 1;
+                foreach (var d in Query)
+                {
+                    result.Rows.Add(index, d.Activity, d.CancelDate.ToString("dd MMM yyyy"), d.CancelBy, d.RequestedBy, d.CancelReason);
+                    index++;
+                }
+            }
+
+            return Excel.CreateExcel(new List<KeyValuePair<DataTable, string>>() { new KeyValuePair<DataTable, string>(result, "Cancel Approval Cost Calculation") }, true);
+        }
+        #endregion
+        #endregion
     }
 }

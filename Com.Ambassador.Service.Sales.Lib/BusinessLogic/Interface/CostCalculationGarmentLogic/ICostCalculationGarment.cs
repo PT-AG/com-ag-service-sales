@@ -2,9 +2,11 @@
 using Com.Ambassador.Service.Sales.Lib.Utilities;
 using Com.Ambassador.Service.Sales.Lib.Utilities.BaseInterface;
 using Com.Ambassador.Service.Sales.Lib.ViewModels.CostCalculationGarment;
+using Com.Ambassador.Service.Sales.Lib.ViewModels.CostCalculationGarment.Cancel_Approval;
 using Microsoft.AspNetCore.JsonPatch;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -29,5 +31,14 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Interface.CostCalculati
         ReadResponse<dynamic> ReadMaterialsByPRMasterItemIds(int page, int size, string order, string select, string keyword, string filter, string search, string prmasteritemids);
         Task<CostCalculationGarment> ReadByRO(string ro);
         List<CostCalculationGarmentForJournal> GetCCGByRo(string RO_Number);
+        #region CancelApproval
+        ReadResponse<CostCalculationGarment> ReadForCancelApproval(int page, int size, string order, List<string> select, string keyword, string filter);
+        Task<int> CancelApproval(long id, string deletedRemark);
+        Tuple<List<CancelApprovalCostCalculationReportViewModel>, int> ReadCancelApproval(DateTime? dateFrom, DateTime? dateTo, int page, int size, int offset);
+        MemoryStream GenerateExcelCancelApproval(DateTime? dateFrom, DateTime? dateTo, int offset);
+
+        Tuple<List<CancelApprovalCostCalculationReportViewModel>, int> ReadRejectRO(DateTime? dateFrom, DateTime? dateTo, int page, int size, int offset);
+        MemoryStream GenerateExcelReadRejectRO(DateTime? dateFrom, DateTime? dateTo, int offset);
+        #endregion
     }
 }
