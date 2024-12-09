@@ -48,6 +48,8 @@ namespace Com.Ambassador.Service.Sales.Lib.ViewModels.GarmentSalesContractViewMo
         public string RecipientAddress { get; set; }
         public string RecipientJob { get; set; }
 
+        public string BuyerType { get; set; }
+
         public List<GarmentSalesContractROViewModel> SalesContractROs { get; set; }
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
@@ -87,13 +89,20 @@ namespace Com.Ambassador.Service.Sales.Lib.ViewModels.GarmentSalesContractViewMo
                 {
                     yield return new ValidationResult("Nama Penerima harus diisi", new List<string> { "RecipientName" });
                 }
-                if (string.IsNullOrWhiteSpace(RecipientJob))
-                {
-                    yield return new ValidationResult("Jabatan Penerima harus diisi", new List<string> { "RecipientJob" });
-                }
+                //if (string.IsNullOrWhiteSpace(RecipientJob))
+                //{
+                //    yield return new ValidationResult("Jabatan Penerima harus diisi", new List<string> { "RecipientJob" });
+                //}
                 if (string.IsNullOrWhiteSpace(RecipientAddress))
                 {
                     yield return new ValidationResult("Alamat Penerima harus diisi", new List<string> { "RecipientAddress" });
+                }
+            }
+            if (this.BuyerType == "Badan Hukum")
+            {
+                if (!string.IsNullOrWhiteSpace(RecipientJob))
+                {
+                    yield return new ValidationResult("Jabatan Penerima harus diisi", new List<string> { "RecipientJob" });
                 }
             }
             
