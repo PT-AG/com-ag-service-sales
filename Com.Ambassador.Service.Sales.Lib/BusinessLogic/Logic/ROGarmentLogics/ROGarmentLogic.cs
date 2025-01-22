@@ -225,21 +225,22 @@ namespace Com.Ambassador.Service.Sales.Lib.BusinessLogic.Logic.ROGarmentLogics
             int totalData = pageable.TotalCount;
 
             var newQuery = data.Join(DbContext.CostCalculationGarments, ro => ro.CostCalculationGarmentId, ccg => ccg.Id, (ro, ccg) =>
-         new RO_Garment
-         {
-             Id = ro.Id,
-             Code = ro.Code,
-             CostCalculationGarment = new CostCalculationGarment()
-             {
-                 RO_Number = ccg.RO_Number,
-                 Article = ccg.Article,
-             },
-             Total = ro.Total,
-             IsPosted = ro.IsPosted,
-             LastModifiedUtc = ro.LastModifiedUtc,
-             IsRejected = ro.IsRejected,
-             RO_Garment_SizeBreakdowns = ro.RO_Garment_SizeBreakdowns
-         });
+            new RO_Garment
+            {
+                Id = ro.Id,
+                Code = ro.Code,
+                CostCalculationGarment = new CostCalculationGarment()
+                {
+                    RO_Number = ccg.RO_Number,
+                    Article = ccg.Article,
+                    BuyerBrandName = ccg.BuyerBrandName
+                },
+                Total = ro.Total,
+                IsPosted = ro.IsPosted,
+                LastModifiedUtc = ro.LastModifiedUtc,
+                IsRejected = ro.IsRejected,
+                RO_Garment_SizeBreakdowns = ro.RO_Garment_SizeBreakdowns
+            });
 
             List<RO_ComponentAppsViewModel> result = newQuery.Select(x => new RO_ComponentAppsViewModel(x)).ToList();
 
